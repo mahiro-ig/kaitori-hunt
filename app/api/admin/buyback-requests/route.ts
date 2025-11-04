@@ -1,10 +1,11 @@
 // app/api/admin/buyback-requests/route.ts
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
-
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic"; // ← ビルド時の静的最適化を回避
+
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next"; // ← こちらを使う
+import { authOptions } from "@/lib/auth";           // ← API ではなく lib から
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 type PublicUser = { id: string; name: string | null; email: string | null };
 
@@ -46,9 +47,9 @@ async function assertIsAdmin(session: any) {
   if (email && adminEmails.includes(email)) return;
 
   // 3) admin_users テーブルに存在するか
-  if (!supabaseAdmin) throw new Error("SERVER_MISCONFIG");
   const userId = (session.user as any).id;
   if (!userId) throw new Error("UNAUTHORIZED");
+  if (!supabaseAdmin) throw new Error("SERVER_MISCONFIG");
 
   const { data, error } = await supabaseAdmin
     .from("admin_users")
@@ -63,14 +64,18 @@ async function assertIsAdmin(session: any) {
 
 export async function GET() {
   try {
+    // セッション & 管理者チェック
     const session = await getServerSession(authOptions);
     await assertIsAdmin(session);
 
     if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Server not initialized" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Server not initialized" },
+        { status: 500 }
+      );
     }
 
-    // 1) まず buyback_requests を取得（FKが無くてもOK）
+    // 1) buyback_requests を取得
     const { data: reqRows, error: reqErr } = await supabaseAdmin
       .from("buyback_requests")
       .select(
@@ -95,7 +100,7 @@ export async function GET() {
 
     const rows = reqRows ?? [];
 
-    // 2) user_id をユニーク抽出して、users を IN でまとめ取り
+    // 2) users をまとめ取り
     const userIds = Array.from(
       new Set(
         rows
@@ -116,17 +121,21 @@ export async function GET() {
         console.error("[buyback-requests] select users error:", usersErr);
       } else if (userRows?.length) {
         usersMap = userRows.reduce((acc: Record<string, PublicUser>, u: any) => {
-          acc[String(u.id)] = { id: String(u.id), name: u.name ?? null, email: u.email ?? null };
+          acc[String(u.id)] = {
+            id: String(u.id),
+            name: u.name ?? null,
+            email: u.email ?? null,
+          };
           return acc;
         }, {});
       }
     }
 
-    // 3) 整形して返す（ユーザー情報は最小限）
+    // 3) 整形
     const payload = rows.map((r: any) => {
       const rawMethod: string | null = r?.purchase_method ?? null;
       const user: PublicUser | null =
-        (r?.user_id && usersMap[r.user_id]) ? usersMap[r.user_id] : null;
+        r?.user_id && usersMap[r.user_id] ? usersMap[r.user_id] : null;
 
       return {
         id: String(r.id),

@@ -7,9 +7,10 @@ import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 /**
- * NextAuth（usersテーブルのハッシュ照合版）
+ * NextAuth（usersテーブルのハッシュ照合）
  * - Supabase Auth は使わない
  * - Service Role で users を参照し、password を bcrypt.compare で検証
+ * - ※ supabaseAdmin は import 時に throw しない実装が前提（null の可能性あり）
  */
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -23,6 +24,9 @@ export const authOptions: NextAuthOptions = {
         const email = (credentials?.email ?? "").trim().toLowerCase();
         const password = credentials?.password ?? "";
         if (!email || !password) return null;
+
+        // supabaseAdmin が未初期化の場合は認証不可（ENV未設定など）
+        if (!supabaseAdmin) return null;
 
         // users からパスワードハッシュ取得
         const { data: user, error } = await supabaseAdmin
@@ -45,7 +49,7 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: { strategy: "jwt", maxAge: 60 * 60 * 2 }, // 2時間（必要に応じて調整）
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -68,9 +72,11 @@ export const authOptions: NextAuthOptions = {
  * requireAdminAPI: 管理APIガード
  * - 内部APIキー or NextAuth セッション
  * - admin_users テーブル or role=admin を許可
+ * - 例外を投げる（API側で try/catch して適切なステータスで返す想定）
  */
 export async function requireAdminAPI(request: Request) {
-  if (process.env.DEBUG_ADMIN === "1") {
+  const dbg = process.env.DEBUG_ADMIN === "1";
+  if (dbg) {
     console.log("[admin dbg] auth header =", request.headers.get("authorization"));
     console.log("[admin dbg] x-admin-key =", request.headers.get("x-admin-key"));
     console.log("[admin dbg] x-admin-api-key =", request.headers.get("x-admin-api-key"));
@@ -89,11 +95,11 @@ export async function requireAdminAPI(request: Request) {
     process.env.ADMIN_INTERNAL_API_KEY;
 
   if (incomingKey && envKey && incomingKey === envKey) {
-    if (process.env.DEBUG_ADMIN === "1") console.log("[admin dbg] passed by API key");
+    if (dbg) console.log("[admin dbg] passed by API key");
     return { type: "key" as const };
   }
 
-  // 2) NextAuth セッション認証
+  // 2) NextAuth セッション認証（動的 import で依存ループ/ビルド時解決問題を回避）
   let uid: string | null = null;
   let role: string | null = null;
   let email: string | null = null;
@@ -105,15 +111,13 @@ export async function requireAdminAPI(request: Request) {
     role = (session?.user as any)?.role ?? null;
     email = (session?.user as any)?.email ?? null;
 
-    if (process.env.DEBUG_ADMIN === "1") {
+    if (dbg) {
       console.log("[admin dbg] session.user.id   =", uid);
       console.log("[admin dbg] session.user.role =", role);
       console.log("[admin dbg] session.user.email=", email);
     }
   } catch (e) {
-    if (process.env.DEBUG_ADMIN === "1") {
-      console.warn("[admin dbg] getServerSession failed:", (e as Error)?.message);
-    }
+    if (dbg) console.warn("[admin dbg] getServerSession failed:", (e as Error)?.message);
   }
 
   if (!uid) {
@@ -123,35 +127,35 @@ export async function requireAdminAPI(request: Request) {
   }
 
   // 3) 管理者判定（role==='admin' or admin_users に登録）
-  try {
-    if (role === "admin") {
-      if (process.env.DEBUG_ADMIN === "1") console.log("[admin dbg] passed by role=admin");
-      return { type: "session" as const, userId: uid };
-    }
-
-    const { data, error } = await supabaseAdmin
-      .from("admin_users")
-      .select("id,user_id")
-      .or(`id.eq.${uid},user_id.eq.${uid}`)
-      .maybeSingle();
-
-    if (process.env.DEBUG_ADMIN === "1") {
-      console.log("[admin dbg] admin_users hit =", !!data, "error =", error?.message);
-    }
-
-    if (error) {
-      const e = new Error("DB error");
-      (e as any).statusCode = 500;
-      throw e;
-    }
-    if (!data) {
-      const e = new Error("Forbidden");
-      (e as any).statusCode = 403;
-      throw e;
-    }
-
+  if (role === "admin") {
+    if (dbg) console.log("[admin dbg] passed by role=admin");
     return { type: "session" as const, userId: uid };
-  } catch (e) {
+  }
+
+  if (!supabaseAdmin) {
+    const e = new Error("Server misconfigured");
+    (e as any).statusCode = 500;
     throw e;
   }
+
+  const { data, error } = await supabaseAdmin
+    .from("admin_users")
+    .select("id,user_id")
+    .or(`id.eq.${uid},user_id.eq.${uid}`)
+    .maybeSingle();
+
+  if (dbg) console.log("[admin dbg] admin_users hit =", !!data, "error =", error?.message);
+
+  if (error) {
+    const e = new Error("DB error");
+    (e as any).statusCode = 500;
+    throw e;
+  }
+  if (!data) {
+    const e = new Error("Forbidden");
+    (e as any).statusCode = 403;
+    throw e;
+  }
+
+  return { type: "session" as const, userId: uid };
 }
