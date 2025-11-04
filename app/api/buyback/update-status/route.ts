@@ -1,10 +1,10 @@
 // app/api/buyback/update-status/route.ts
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const runtime = "nodejs";         // nodemailer を使うので Edge 不可
+export const dynamic = "force-dynamic";  // 常に実行時評価
 
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
-import { sendMail } from "@/lib/mailer";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin"; // ← 遅延初期化版に切替
+import { sendMail } from "@/lib/mailer";                // ← 遅延初期化のメールユーティリティ
 
 type Item = {
   price?: number;
@@ -75,6 +75,9 @@ function pickCapacityLike(obj: any): string | undefined {
 }
 
 export async function POST(req: Request) {
+  // ← ここで初めて Service Role を生成（ビルド時に env を評価しない）
+  const supabaseAdmin = getSupabaseAdmin();
+
   const { requestId, newStatus } = await req.json();
   if (!requestId || !newStatus) {
     return NextResponse.json({ error: "requestId/newStatus is required" }, { status: 400 });
@@ -340,7 +343,6 @@ export async function POST(req: Request) {
         undefined
       );
     } catch (e: any) {
-      // 本番で失敗は throw、開発は mailer 側で握って警告ログ
       return NextResponse.json({ ok: false, error: e?.message ?? "send failed" }, { status: 500 });
     }
   }
