@@ -221,38 +221,7 @@ export const purchaseAPI = {
   },
 };
 
-// 本人確認 API
-export const verificationAPI = {
-  getAllVerifications() {
-    return apiRequest<Verification[]>("/api/verifications");
-  },
-  getVerification(id: string) {
-    return apiRequest<Verification>(
-      `/api/verifications/${id}`
-    );
-  },
-  submitVerification(data: {
-    documentType: string;
-    documentImage: string;
-  }) {
-    return apiRequest<Verification>(
-      "/api/verifications",
-      {
-        method: "POST",
-        body: JSON.stringify(data),
-      }
-    );
-  },
-  updateVerificationStatus(id: string, status: string) {
-    return apiRequest<Verification>(
-      `/api/verifications/${id}/status`,
-      {
-        method: "PUT",
-        body: JSON.stringify({ status }),
-      }
-    );
-  },
-};
+
 
 // カート API
 export const cartAPI = {

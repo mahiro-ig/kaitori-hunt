@@ -57,7 +57,6 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
       { name: "ダッシュボード", href: "/admin", icon: LayoutDashboard },
       { name: "買取管理", href: "/admin/purchases", icon: ShoppingBag },
       { name: "ユーザー管理", href: "/admin/users", icon: Users },
-      { name: "本人確認", href: "/admin/verifications", icon: ShieldCheck },
       { name: "レポート", href: "/admin/reports", icon: BarChart3 },
       { name: "ニュース", href: "/admin/news", icon: Newspaper },
       { name: "設定", href: "/admin/settings", icon: Settings },
