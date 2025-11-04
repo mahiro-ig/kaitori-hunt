@@ -1,8 +1,13 @@
 // app/api/auth/bank-account/route.ts
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../[...nextauth]/route";
+// ⚠ 直接 ../[...nextauth]/route を参照するとビルド時に巻き込まれやすいので、lib/auth 経由にします
+import { authOptions } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
 type BankAccountBody = {
@@ -13,28 +18,23 @@ type BankAccountBody = {
   accountName:   string;
 };
 
-
 export async function GET() {
   const session: any = await getServerSession(authOptions);
   const userId: string | undefined = session?.user?.id;
+
   if (!userId) {
     return NextResponse.json({ error: "未認証です" }, { status: 401 });
   }
 
   const { data, error } = await supabaseAdmin
     .from("users")
-    .select(
-      "bank_name, branch_name, account_type, account_number, account_name"
-    )
+    .select("bank_name, branch_name, account_type, account_number, account_name")
     .eq("id", userId)
     .maybeSingle();
 
   if (error) {
     console.error("🔥 BankAccount GET error:", error);
-    return NextResponse.json(
-      { error: "取得に失敗しました" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "取得に失敗しました" }, { status: 500 });
   }
 
   return NextResponse.json({
@@ -46,11 +46,11 @@ export async function GET() {
   });
 }
 
-
 export async function PUT(request: Request) {
   const session: any = await getServerSession(authOptions);
   const userId: string | undefined    = session?.user?.id;
   const userEmail: string | undefined = session?.user?.email;
+
   if (!userId || !userEmail) {
     return NextResponse.json({ error: "未認証です" }, { status: 401 });
   }
@@ -64,13 +64,9 @@ export async function PUT(request: Request) {
   } = (await request.json()) as BankAccountBody;
 
   if (!bankName) {
-    return NextResponse.json(
-      { error: "銀行名は必須です" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "銀行名は必須です" }, { status: 400 });
   }
 
-  
   const upsertData = {
     id:             userId,
     email:          userEmail,
@@ -87,10 +83,7 @@ export async function PUT(request: Request) {
 
   if (error) {
     console.error("🔥 BankAccount PUT error:", error);
-    return NextResponse.json(
-      { error: "更新に失敗しました" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "更新に失敗しました" }, { status: 500 });
   }
 
   return NextResponse.json({ message: "更新成功" });
