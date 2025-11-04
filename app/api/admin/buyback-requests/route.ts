@@ -1,11 +1,12 @@
 // app/api/admin/buyback-requests/route.ts
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic"; // ← ビルド時の静的最適化を回避
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next"; // ← こちらを使う
-import { authOptions } from "@/lib/auth";           // ← API ではなく lib から
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 type PublicUser = { id: string; name: string | null; email: string | null };
 
@@ -49,9 +50,9 @@ async function assertIsAdmin(session: any) {
   // 3) admin_users テーブルに存在するか
   const userId = (session.user as any).id;
   if (!userId) throw new Error("UNAUTHORIZED");
-  if (!supabaseAdmin) throw new Error("SERVER_MISCONFIG");
 
-  const { data, error } = await supabaseAdmin
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
     .from("admin_users")
     .select("id")
     .eq("id", userId)
@@ -68,15 +69,10 @@ export async function GET() {
     const session = await getServerSession(authOptions);
     await assertIsAdmin(session);
 
-    if (!supabaseAdmin) {
-      return NextResponse.json(
-        { error: "Server not initialized" },
-        { status: 500 }
-      );
-    }
+    const supabase = getSupabaseAdmin();
 
     // 1) buyback_requests を取得
-    const { data: reqRows, error: reqErr } = await supabaseAdmin
+    const { data: reqRows, error: reqErr } = await supabase
       .from("buyback_requests")
       .select(
         `
@@ -111,7 +107,7 @@ export async function GET() {
 
     let usersMap: Record<string, PublicUser> = {};
     if (userIds.length > 0) {
-      const { data: userRows, error: usersErr } = await supabaseAdmin
+      const { data: userRows, error: usersErr } = await supabase
         .from("users")
         .select("id, name, email")
         .in("id", userIds);
