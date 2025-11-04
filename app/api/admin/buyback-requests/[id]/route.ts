@@ -1,11 +1,14 @@
 // app/api/admin/buyback-requests/[id]/route.ts
-import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { getToken } from "next-auth/jwt";
-
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { getToken } from "next-auth/jwt";
+import { authOptions } from "@/lib/auth";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /* ================================
    画像URL 正規化（環境変数に依存しない）
@@ -18,6 +21,7 @@ function parseStoragePublicPath(raw: string) {
 }
 
 async function resolveImageUrl(
+  supabase: SupabaseClient,
   urlOrPath: unknown,
   opts?: { preferSigned?: boolean; signedTTLSeconds?: number; diag?: boolean }
 ): Promise<{ url: string | null; diag?: Record<string, any> }> {
@@ -40,17 +44,25 @@ async function resolveImageUrl(
   // /storage/v1/object/public/<bucket>/<path>
   const pubParsed = parseStoragePublicPath(raw);
   if (pubParsed) {
-    const from = supabaseAdmin?.storage.from(pubParsed.bucket);
-    if (!from) return { url: null, diag: wantDiag ? { ...diag, kind: "public-prefix", error: "no storage client" } : undefined };
+    const from = supabase.storage.from(pubParsed.bucket);
     const { data: pub } = from.getPublicUrl(pubParsed.path);
     if (pub?.publicUrl) {
-      return { url: pub.publicUrl, diag: wantDiag ? { ...diag, kind: "public-prefix", bucket: pubParsed.bucket, path: pubParsed.path } : undefined };
+      return {
+        url: pub.publicUrl,
+        diag: wantDiag ? { ...diag, kind: "public-prefix", bucket: pubParsed.bucket, path: pubParsed.path } : undefined,
+      };
     }
     if (preferSigned) {
       const { data: s } = await from.createSignedUrl(pubParsed.path, signedTTL);
-      return { url: s?.signedUrl ?? null, diag: wantDiag ? { ...diag, kind: "public-prefix->signed", bucket: pubParsed.bucket, path: pubParsed.path } : undefined };
+      return {
+        url: s?.signedUrl ?? null,
+        diag: wantImgDiag ? { ...diag, kind: "public-prefix->signed", bucket: pubParsed.bucket, path: pubParsed.path } : undefined,
+      };
     }
-    return { url: null, diag: wantDiag ? { ...diag, kind: "public-prefix", bucket: pubParsed.bucket, path: pubParsed.path, error: "no public url" } : undefined };
+    return {
+      url: null,
+      diag: wantDiag ? { ...diag, kind: "public-prefix", bucket: pubParsed.bucket, path: pubParsed.path, error: "no public url" } : undefined,
+    };
   }
 
   // /storage/v1/object/sign/... は相対だと扱わない
@@ -63,12 +75,15 @@ async function resolveImageUrl(
   if (slash > 0) {
     const bucket = raw.slice(0, slash);
     const path = raw.slice(slash + 1);
-    const from = supabaseAdmin?.storage.from(bucket);
-    if (!from) return { url: null, diag: wantDiag ? { ...diag, kind: "bucket-path", error: "no storage client" } : undefined };
+    const from = supabase.storage.from(bucket);
 
     if (preferSigned) {
       const { data } = await from.createSignedUrl(path, signedTTL);
-      if (data?.signedUrl) return { url: data.signedUrl, diag: wantDiag ? { ...diag, kind: "bucket-path->signed", bucket, path } : undefined };
+      if (data?.signedUrl)
+        return {
+          url: data.signedUrl,
+          diag: wantDiag ? { ...diag, kind: "bucket-path->signed", bucket, path } : undefined,
+        };
     }
     const { data } = from.getPublicUrl(path);
     return { url: data?.publicUrl ?? null, diag: wantDiag ? { ...diag, kind: "bucket-path", bucket, path } : undefined };
@@ -78,8 +93,8 @@ async function resolveImageUrl(
   const m = raw.match(/^public\/([^/]+)\/(.+)$/i);
   if (m) {
     const [, bucket, path] = m;
-    const from = supabaseAdmin?.storage.from(bucket);
-    const { data } = from?.getPublicUrl(path) ?? {};
+    const from = supabase.storage.from(bucket);
+    const { data } = from.getPublicUrl(path);
     return { url: data?.publicUrl ?? null, diag: wantDiag ? { ...diag, kind: "public-bucket-path", bucket, path } : undefined };
   }
 
@@ -104,13 +119,15 @@ async function extractUidAndRole(req: Request): Promise<{ uid: string | null; ro
   return { uid: uidFromSession, role: roleFromSession };
 }
 
-async function assertIsAdmin(req: Request): Promise<{ ok: boolean; userId?: string; reason?: string }> {
+async function assertIsAdmin(
+  req: Request,
+  supabase: SupabaseClient
+): Promise<{ ok: boolean; userId?: string; reason?: string }> {
   const { uid, role } = await extractUidAndRole(req);
   if (!uid) return { ok: false, reason: "no-session" };
-  if (!supabaseAdmin) return { ok: false, reason: "no-supabase" };
   if (role === "admin") return { ok: true, userId: uid };
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from("admin_users")
     .select("user_id,id")
     .or(`user_id.eq.${uid},id.eq.${uid}`)
@@ -149,8 +166,7 @@ type SafeItem = {
   image_url: string | null; // Storage の絶対URL
   quantity: number;
   price: number | null;
-  // 診断モード用の付加情報（通常は返さない）
-  _imgdiag?: Record<string, any>;
+  _imgdiag?: Record<string, any>; // 診断モード用
 };
 
 function toNumberOrNull(v: unknown): number | null {
@@ -196,9 +212,10 @@ function pickOrderUnitPrice(it: Record<string, any>): number | null {
    ================================ */
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
+    const supabase = getSupabaseAdmin();
     const u = new URL(req.url);
 
     // 診断モード
@@ -207,7 +224,7 @@ export async function GET(
       const session = await getServerSession(authOptions);
       let head: any = null, err: any = null;
       try {
-        const { data, error } = await supabaseAdmin!.from("admin_users").select("user_id,id").limit(10);
+        const { data, error } = await supabase.from("admin_users").select("user_id,id").limit(10);
         head = data; err = error?.message ?? null;
       } catch (e: any) { err = e?.message ?? String(e); }
       return NextResponse.json(
@@ -226,21 +243,18 @@ export async function GET(
     }
 
     // 認可
-    const admin = await assertIsAdmin(req);
+    const admin = await assertIsAdmin(req, supabase);
     if (!admin.ok) {
       return NextResponse.json(
         { error: admin.reason === "not-admin" ? "Forbidden" : "Unauthorized", detail: admin.reason ?? null },
         { status: admin.reason === "not-admin" ? 403 : 401, headers: { "Cache-Control": "no-store" } }
       );
     }
-    if (!supabaseAdmin) {
-      return NextResponse.json({ error: "Server misconfiguration" }, { status: 500, headers: { "Cache-Control": "no-store" } });
-    }
 
-    const { id } = await params;
+    const { id } = params;
 
     // 申込本体 + ユーザー
-    const { data: reqData, error: reqErr } = await supabaseAdmin
+    const { data: reqData, error: reqErr } = await supabase
       .from("buyback_requests")
       .select(`
         id,
@@ -269,8 +283,12 @@ export async function GET(
       .eq("id", id)
       .maybeSingle();
 
-    if (reqErr) return NextResponse.json({ error: reqErr.message }, { status: 500, headers: { "Cache-Control": "no-store" } });
-    if (!reqData) return NextResponse.json({ error: "Record not found" }, { status: 404, headers: { "Cache-Control": "no-store" } });
+    if (reqErr) {
+      return NextResponse.json({ error: reqErr.message }, { status: 500, headers: { "Cache-Control": "no-store" } });
+    }
+    if (!reqData) {
+      return NextResponse.json({ error: "Record not found" }, { status: 404, headers: { "Cache-Control": "no-store" } });
+    }
 
     const {
       id: reqId,
@@ -301,7 +319,7 @@ export async function GET(
       new Set(normalizedRawItems.map((it) => it.variant_id).filter((v): v is number => v !== null))
     );
 
-    // variants → product(image_url) 取得（余計な列は選ばない）
+    // variants → product(image_url) 取得
     let variants:
       | Array<{
           id: number;
@@ -315,7 +333,7 @@ export async function GET(
       | [] = [];
 
     if (variantIds.length > 0) {
-      const { data: vData, error: vErr } = await supabaseAdmin
+      const { data: vData, error: vErr } = await supabase
         .from("product_variants")
         .select(
           `
@@ -352,7 +370,7 @@ export async function GET(
         const product_name = it.product_name ?? (p?.name ?? null);
         const rawProductImage = p?.image_url ?? null;
 
-        const { url: resolvedImage, diag } = await resolveImageUrl(rawProductImage, { diag: wantImgDiag });
+        const { url: resolvedImage, diag } = await resolveImageUrl(supabase, rawProductImage, { diag: wantImgDiag });
 
         const jan_code = it.jan_code ?? (v?.jan_code ?? null);
 
@@ -378,7 +396,7 @@ export async function GET(
     // 本人確認
     let verification_status: string | null = null;
     if (user_id != null) {
-      const { data: verifData, error: verErr } = await supabaseAdmin
+      const { data: verifData, error: verErr } = await supabase
         .from("verifications")
         .select("status")
         .eq("user_id", user_id as any)
@@ -397,14 +415,14 @@ export async function GET(
         }>
       | [] = [];
 
-    const { data: hist1, error: histErr1 } = await supabaseAdmin
+    const { data: hist1, error: histErr1 } = await supabase
       .from("purchase_status_history")
       .select("id, previous_status, new_status, changed_at")
       .eq("buyback_request_id", id)
       .order("changed_at", { ascending: true });
 
     if (histErr1) {
-      const { data: hist2, error: histErr2 } = await supabaseAdmin
+      const { data: hist2, error: histErr2 } = await supabase
         .from("purchase_status_history")
         .select("id, previous_status, new_status, changed_at")
         .eq("request_id", id)
@@ -457,23 +475,22 @@ const ALLOWED_STATUSES = new Set([
    ================================ */
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const admin = await assertIsAdmin(req);
+    const supabase = getSupabaseAdmin();
+
+    const admin = await assertIsAdmin(req, supabase);
     if (!admin.ok) {
       return NextResponse.json(
         { message: admin.reason === "not-admin" ? "Forbidden" : "Unauthorized" },
         { status: admin.reason === "not-admin" ? 403 : 401, headers: { "Cache-Control": "no-store" } }
       );
     }
-    if (!supabaseAdmin) {
-      return NextResponse.json({ message: "Server misconfiguration" }, { status: 500, headers: { "Cache-Control": "no-store" } });
-    }
 
-    const { id } = await params;
+    const { id } = params;
 
-    const body = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({} as any));
     const status = typeof body?.status === "string" ? (body.status as string) : undefined;
     const note = typeof body?.note === "string" ? (body.note as string) : undefined;
 
@@ -481,7 +498,7 @@ export async function PATCH(
       return NextResponse.json({ success: true, noop: true }, { headers: { "Cache-Control": "no-store" } });
     }
 
-    const { data: prevRow, error: prevErr } = await supabaseAdmin
+    const { data: prevRow, error: prevErr } = await supabase
       .from("buyback_requests")
       .select("status")
       .eq("id", id)
@@ -499,7 +516,7 @@ export async function PATCH(
     }
 
     if (typeof status !== "undefined" && status !== prevRow.status) {
-      const { error: updErr } = await supabaseAdmin
+      const { error: updErr } = await supabase
         .from("buyback_requests")
         .update({ status, updated_at: new Date().toISOString() })
         .eq("id", id);
@@ -518,7 +535,7 @@ export async function PATCH(
       };
 
       const tryInsert = async (col: "buyback_request_id" | "request_id") => {
-        const { error } = await supabaseAdmin.from("purchase_status_history").insert([{ [col]: id, ...basePayload } as any]);
+        const { error } = await supabase.from("purchase_status_history").insert([{ [col]: id, ...basePayload } as any]);
         return error;
       };
 
