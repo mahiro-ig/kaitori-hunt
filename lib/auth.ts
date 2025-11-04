@@ -1,23 +1,16 @@
 // /lib/auth.ts
 import "server-only";
 
-import { createClient } from "@supabase/supabase-js";
-import CredentialsProvider from "next-auth/providers/credentials";
 import type { NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
 
-// ================================
-// NextAuth 設定（Supabase Auth と連携）
-// ================================
-
-// サーバー専用（Service Role）クライアント
-// ※ URL は NEXT_PUBLIC ではなく SUPABASE_URL を使う
-const supabase = createClient(
-  process.env.SUPABASE_URL!,            // ← ここを変更
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-// Supabase Auth を使った認証（メール+パスワード）
+/**
+ * NextAuth（usersテーブルのハッシュ照合版）
+ * - Supabase Auth は使わない
+ * - Service Role で users を参照し、password を bcrypt.compare で検証
+ */
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -27,20 +20,28 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        const email = (credentials?.email ?? "").trim().toLowerCase();
+        const password = credentials?.password ?? "";
+        if (!email || !password) return null;
 
-        // Supabase Auth でログイン
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: credentials.email,
-          password: credentials.password,
-        });
-        if (error || !data.user) return null;
+        // users からパスワードハッシュ取得
+        const { data: user, error } = await supabaseAdmin
+          .from("users")
+          .select("id, email, password, role, name")
+          .eq("email", email)
+          .maybeSingle();
+
+        if (error || !user?.password) return null;
+
+        const ok = await bcrypt.compare(password, user.password);
+        if (!ok) return null;
 
         return {
-          id: data.user.id,
-          email: data.user.email,
-          role: (data.user.app_metadata as any)?.role ?? "user",
-        };
+          id: user.id,
+          email: user.email,
+          role: (user as any).role ?? "user",
+          name: (user as any).name ?? null,
+        } as any;
       },
     }),
   ],
@@ -56,16 +57,18 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user && token?.sub) {
         (session.user as any).id = token.sub;
-        (session.user as any).role = (token as any).role;
+        (session.user as any).role = (token as any).role ?? "user";
       }
       return session;
     },
   },
 };
 
-// ================================
-// requireAdminAPI (API認可チェック用)
-// ================================
+/**
+ * requireAdminAPI: 管理APIガード
+ * - 内部APIキー or NextAuth セッション
+ * - admin_users テーブル or role=admin を許可
+ */
 export async function requireAdminAPI(request: Request) {
   if (process.env.DEBUG_ADMIN === "1") {
     console.log("[admin dbg] auth header =", request.headers.get("authorization"));
@@ -97,7 +100,6 @@ export async function requireAdminAPI(request: Request) {
 
   try {
     const { getServerSession } = await import("next-auth/next");
-    // ★ 同ファイルの authOptions をそのまま参照（自己 import しない）
     const session = await getServerSession(authOptions);
     uid = (session?.user as any)?.id ?? null;
     role = (session?.user as any)?.role ?? null;
@@ -120,23 +122,11 @@ export async function requireAdminAPI(request: Request) {
     throw e;
   }
 
-  // 3) 管理者判定（role==='admin' or admin_users テーブルに登録）
+  // 3) 管理者判定（role==='admin' or admin_users に登録）
   try {
     if (role === "admin") {
       if (process.env.DEBUG_ADMIN === "1") console.log("[admin dbg] passed by role=admin");
       return { type: "session" as const, userId: uid };
-    }
-
-    if (!supabaseAdmin) {
-      const e = new Error("Server DB not initialized");
-      (e as any).statusCode = 500;
-      throw e;
-    }
-
-    if (process.env.DEBUG_ADMIN === "1") {
-      const head = await supabaseAdmin.from("admin_users").select("user_id,id").limit(5);
-      console.log("[admin dbg] check uid =", uid);
-      console.log("[admin dbg] admin_users(head) =", head.data);
     }
 
     const { data, error } = await supabaseAdmin
@@ -165,4 +155,3 @@ export async function requireAdminAPI(request: Request) {
     throw e;
   }
 }
-

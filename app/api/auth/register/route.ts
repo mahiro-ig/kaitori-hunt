@@ -1,88 +1,66 @@
-// /app/api/auth/register/route.ts
+// app/api/auth/register/route.ts
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";             // 読み取り用クライアント
-import { supabaseAdmin } from "@/lib/supabaseAdmin";   // 挿入用サービスロールキー
+import { supabaseAdmin } from "@/lib/supabaseAdmin";
 import bcrypt from "bcryptjs";
+
+type RegisterBody = {
+  name: string;
+  email: string;
+  password: string;
+};
+
+function badRequest(msg: string) {
+  return NextResponse.json({ error: msg }, { status: 400 });
+}
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, email, password } = body;
+    const body = (await request.json()) as Partial<RegisterBody>;
+    const name = (body.name ?? "").trim();
+    const email = (body.email ?? "").trim().toLowerCase();
+    const password = body.password ?? "";
 
-    // 1) 必須項目チェック
-    if (!name || !email || !password) {
-      return NextResponse.json(
-        { error: "全ての項目を入力してください" },
-        { status: 400 }
-      );
-    }
+    if (!name || !email || !password) return badRequest("全ての項目を入力してください");
 
-    // ✅ パスワード強度チェック（フロントと同じルール）
     const PASSWORD_PATTERN =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
     if (!PASSWORD_PATTERN.test(password)) {
-      return NextResponse.json(
-        {
-          error:
-            "パスワードは8文字以上で、大文字・小文字・数字・特殊文字(@$!%*?&)をそれぞれ1つ以上含める必要があります",
-        },
-        { status: 400 }
-      );
+      return badRequest("パスワードは8文字以上で、大文字・小文字・数字・特殊文字(@$!%*?&)を各1つ以上含めてください");
     }
 
-    // 2) 重複チェック（行0件なら data === null）
-    const { data: existingUser, error: selectError } = await supabase
+    // 既存ユーザー重複チェック（Service RoleでRLSバイパス）
+    const { data: existing, error: selErr } = await supabaseAdmin
       .from("users")
       .select("id")
       .eq("email", email)
-      .maybeSingle(); // ← single() から maybeSingle() に変更済み
+      .maybeSingle();
 
-    if (selectError) {
-      console.error("Supabase select error:", selectError);
-      return NextResponse.json(
-        { error: "ユーザー確認に失敗しました" },
-        { status: 500 }
-      );
+    if (selErr) {
+      console.error("register select err:", selErr.message);
+      return NextResponse.json({ error: "ユーザー確認に失敗しました" }, { status: 500 });
     }
+    if (existing) return badRequest("すでにこのメールアドレスは登録されています");
 
-    if (existingUser) {
-      return NextResponse.json(
-        { error: "すでにこのメールアドレスは登録されています" },
-        { status: 400 }
-      );
-    }
+    const hashed = await bcrypt.hash(password, 10);
 
-    // 3) パスワードをハッシュ化
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 4) サーバーサイドクライアントで挿入
-    const { error: insertError } = await supabaseAdmin
+    const { error: insErr } = await supabaseAdmin
       .from("users")
-      .insert([
-        {
-          name,
-          email,
-          password: hashedPassword,
-        },
-      ])
+      .insert([{ name, email, password: hashed, role: "user" }]) // role列がなければ外してOK
       .single();
 
-    if (insertError) {
-      console.error("Supabase insert error:", insertError);
-      return NextResponse.json(
-        { error: "登録に失敗しました" },
-        { status: 500 }
-      );
+    if (insErr) {
+      console.error("register insert err:", insErr.message);
+      return NextResponse.json({ error: "登録に失敗しました" }, { status: 500 });
     }
 
-    // 成功レスポンス
-    return NextResponse.json({ message: "登録成功" }, { status: 200 });
-  } catch (err: any) {
-    console.error("API Error:", err);
-    return NextResponse.json(
-      { error: "サーバーエラーが発生しました" },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: true }, { status: 200 });
+  } catch (e: any) {
+    console.error("register fatal:", e?.message || e);
+    return NextResponse.json({ error: "サーバーエラーが発生しました" }, { status: 500 });
   }
 }
