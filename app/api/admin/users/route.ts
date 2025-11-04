@@ -2,56 +2,40 @@
 export const runtime = "nodejs";
 
 import { NextResponse, type NextRequest } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth"; // ← あなたの環境に合わせて（/lib/auth.ts に authOptions がある想定）
-import { supabaseAdmin } from "@/lib/supabase"; // or "@/lib/supabaseAdmin" を使っている場合はそちらに
+import { supabaseAdmin } from "@/lib/supabaseAdmin"; // ← 必ず server専用のAdminクライアントに
 
 const noStore = { headers: { "Cache-Control": "no-store" } } as const;
 
-// このファイル内で完結する簡易管理者ガード
-async function requireAdminSession() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+// 最小ガード: APIキーのみで保護（next-auth非依存）
+function requireAdminApiKey(req: NextRequest) {
+  const headerKey = req.headers.get("x-admin-api-key") ?? "";
+  const envKey = process.env.ADMIN_API_KEY ?? "";
+  if (!envKey || headerKey !== envKey) {
     return { ok: false as const, status: 401 as const, error: "Unauthorized" };
   }
-
-  const adminEmails = (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((s) => s.trim().toLowerCase())
-    .filter(Boolean);
-
-  const isAdmin =
-    (session.user as any)?.role === "admin" ||
-    (session.user?.email && adminEmails.includes(session.user.email.toLowerCase()));
-
-  if (!isAdmin) {
-    return { ok: false as const, status: 403 as const, error: "Forbidden" };
-  }
-
-  return { ok: true as const, session };
+  return { ok: true as const };
 }
 
-// GET /api/admin/users → 一覧取得（新しい順）
-// 必要なら後で ?page= / ?pageSize= / ?q= などを拡張できます
 export async function GET(request: NextRequest) {
+  // 認可
+  const guard = requireAdminApiKey(request);
+  if (!guard.ok) {
+    return NextResponse.json({ error: guard.error }, { status: guard.status, ...noStore });
+  }
+
+  if (!supabaseAdmin) {
+    console.error("[api/admin/users] supabaseAdmin is not initialized");
+    return NextResponse.json({ error: "サーバー設定エラー" }, { status: 500, ...noStore });
+  }
+
   try {
-    const guard = await requireAdminSession();
-    if (!guard.ok) {
-      return NextResponse.json({ error: guard.error }, { status: guard.status, ...noStore });
-    }
-
-    if (!supabaseAdmin) {
-      console.error("[api/admin/users] supabaseAdmin is not initialized");
-      return NextResponse.json({ error: "サーバー設定エラー" }, { status: 500, ...noStore });
-    }
-
     const { data, error } = await supabaseAdmin
       .from("users")
       .select(
         [
           "id",
-          "name",
           "public_id",
+          "name",
           "email",
           "phone",
           "postal_code",
