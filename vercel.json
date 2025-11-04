@@ -1,0 +1,7 @@
+{
+  "regions": ["hnd1"],
+  "redirects": [
+    { "source": "www.kaitori-hunt.com", "destination": "https://kaitori-hunt.com", "permanent": true },
+    { "source": "/www", "destination": "https://kaitori-hunt.com", "permanent": true }
+  ]
+}
