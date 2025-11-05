@@ -875,17 +875,6 @@ export default function CartPage() {
                   <Input id="email" name="email" value={formData.email} disabled className="bg-muted" />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="notes">備考</Label>
-                  <Textarea
-                    id="notes"
-                    name="notes"
-                    value={formData.notes}
-                    onChange={handleChange}
-                    disabled={isSubmitting}
-                  />
-                </div>
-
                 {purchaseMethod === "shipping" && (
                   <div className="border border-gray-200 bg-gray-100 rounded p-4">
                     <p className="text-sm">

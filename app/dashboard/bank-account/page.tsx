@@ -129,7 +129,7 @@ export default function BankAccountPage() {
         <CardHeader>
           <CardTitle>振込口座情報</CardTitle>
           <CardDescription>
-            売上の振込先として使用します。正確にご入力ください。
+            買取金の振込先として使用します。正確にご入力ください。
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -158,7 +158,7 @@ export default function BankAccountPage() {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
-                placeholder="例）新潟支店"
+                placeholder="例）渋谷支店"
               />
             </div>
 
@@ -201,15 +201,13 @@ export default function BankAccountPage() {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
-                placeholder="例）イガラシ　タロウ"
+                placeholder="例）ヤマダ　タロウ"
               />
             </div>
 
             <Alert className="bg-muted">
               <AlertDescription>
-                口座名義は
-                <b>カタカナ・全角・スペース可</b>
-                で、本人確認書類の氏名と一致させてください。
+                注意事項：口座名義は会員登録時の氏名と一致している必要があります。
               </AlertDescription>
             </Alert>
 

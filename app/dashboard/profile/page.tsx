@@ -163,7 +163,7 @@ export default function ProfilePage() {
 
             <Alert className="bg-muted">
               <AlertDescription>
-                身分証明書の変更が必要な場合はお問い合わせください。
+                18歳未満の方は買取申込ごとに保護者同意書が必要です。詳細はお問い合わせください。
               </AlertDescription>
             </Alert>
 
