@@ -1,6 +1,5 @@
-﻿"use client"
-
-'use client'; 
+﻿// app/search/page.tsx
+'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -55,7 +54,7 @@ export default function SearchPage() {
       ? (rawCategory as CategoryValue)
       : 'all';
 
-  // 笘・霑ｽ蜉: visibleOnly・磯撼陦ｨ遉ｺ繝舌Μ繧｢繝ｳ繝磯勁螟悶ヵ繝ｩ繧ｰ・・
+  // 注: visibleOnly=1 のとき、非表示(is_hidden)のバリアントを除外
   const visibleOnly = (params.get('visibleOnly') ?? '') === '1';
 
   const [keyword, setKeyword] = useState(initialKeyword);
@@ -64,6 +63,7 @@ export default function SearchPage() {
   const [results, setResults] = useState<VariantRow[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // 8桁 or 13桁の数字のみなら JAN とみなす
   const janQuery = useMemo(() => {
     const onlyDigits = keyword.replace(/\D/g, '');
     if (/^\d{8}$/.test(onlyDigits) || /^\d{13}$/.test(onlyDigits)) return onlyDigits;
@@ -98,7 +98,7 @@ export default function SearchPage() {
   const searchByJAN = async (jan: string, cats: Array<Exclude<CategoryValue, 'all'>>): Promise<VariantRow[]> => {
     let q = supabase.from('product_variants').select(selectVariant).limit(200);
     q = applyCategory(q, cats).eq('jan_code', jan);
-    // 笘・霑ｽ蜉: 髱櫁｡ｨ遉ｺ繝舌Μ繧｢繝ｳ繝医ｒ髯､螟・
+    // 注: 非表示バリアントを除外
     if (visibleOnly) q = q.eq('is_hidden', false);
     const { data, error } = (await q) as { data: VariantRow[] | null; error: any };
     if (error) throw error;
@@ -120,7 +120,7 @@ export default function SearchPage() {
       .select(selectVariant)
       .in('product_id', ids)
       .limit(200);
-    // 笘・霑ｽ蜉: 髱櫁｡ｨ遉ｺ繝舌Μ繧｢繝ｳ繝医ｒ髯､螟・
+    // 注: 非表示バリアントを除外
     if (visibleOnly) vq = vq.eq('is_hidden', false);
     const { data: vars, error: vErr } = (await vq) as { data: VariantRow[] | null; error: any };
     if (vErr) throw vErr;
@@ -156,7 +156,7 @@ export default function SearchPage() {
       setResults(dedupeById(merged));
     } catch (e: any) {
       console.error('[search error]', e?.message || e);
-      setErrorMsg('讀懃ｴ｢荳ｭ縺ｫ繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆縲・);
+      setErrorMsg('検索中にエラーが発生しました。');
       setResults([]);
     } finally {
       setLoading(false);
@@ -165,23 +165,25 @@ export default function SearchPage() {
 
   useEffect(() => {
     runSearch();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialKeyword, initialCategory, visibleOnly]); // 笘・霑ｽ蜉: visibleOnly 螟画峩縺ｫ繧ょ渚蠢・
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialKeyword, initialCategory, visibleOnly]); // 注: URLパラメータ変化で再検索
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const p = new URLSearchParams();
     if (keyword.trim()) p.set('q', keyword.trim());
     if (category !== 'all') p.set('category', category);
-    // 笘・霑ｽ蜉: 迴ｾ蝨ｨ縺ｮ visibleOnly 繧堤ｶｭ謖・
+    // 注: visibleOnly の引き回し
     if (visibleOnly) p.set('visibleOnly', '1');
     router.push(`/search${p.toString() ? `?${p.toString()}` : ''}`);
   };
 
   return (
     <>
-      <FixIOSZoom />      {/* 竊・繝壹・繧ｸ隱ｭ霎ｼ/蠕ｩ蟶ｰ譎ゅ↓蛟咲紫繧貞ｼｷ蛻ｶ繝ｪ繧ｻ繝・ヨ */}
-      <NoZoomOnFocus />   {/* 竊・繝輔か繝ｼ繧ｫ繧ｹ荳ｭ縺ｮ閾ｪ蜍輔ぜ繝ｼ繝繧呈椛豁｢ */}
+      {/* iOSのフォーカス拡大対策 */}
+      <FixIOSZoom />
+      <NoZoomOnFocus />
+
       <div className="mx-auto max-w-7xl px-4 md:px-6 py-6 md:py-10">
         <div className="mb-4">
           <Link
@@ -189,15 +191,15 @@ export default function SearchPage() {
             className="inline-flex items-center text-sm text-muted-foreground hover:underline"
           >
             <ArrowLeft className="mr-1 h-4 w-4" />
-            繝帙・繝縺ｫ謌ｻ繧・
+            トップへ戻る
           </Link>
         </div>
 
-        {/* 繝輔か繝ｼ繝 */}
+        {/* 検索フォーム */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle>蝠・刀讀懃ｴ｢</CardTitle>
-            <CardDescription>蝠・刀蜷阪∪縺溘・ JAN 繧ｳ繝ｼ繝峨〒讀懃ｴ｢縺ｧ縺阪∪縺吶・/CardDescription>
+            <CardTitle>商品検索</CardTitle>
+            <CardDescription>商品名または JAN で検索できます。</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={onSubmit} className="flex flex-col gap-3 md:flex-row md:items-center">
@@ -210,53 +212,53 @@ export default function SearchPage() {
                   inputMode="search"
                   value={keyword}
                   onChange={(e) => setKeyword(e.target.value)}
-                  placeholder="萓具ｼ喨Phone 15 Pro / EOS R7 / 4902370******・・AN・・
+                  placeholder="例: iPhone 15 Pro / EOS R7 / 4902370******（JAN）"
                   className="pl-9 text-base md:text-sm h-12 md:h-10"
-                  aria-label="讀懃ｴ｢繧ｭ繝ｼ繝ｯ繝ｼ繝・
+                  aria-label="検索ボックス"
                 />
               </div>
 
               <div className="min-w-[180px]">
                 <Select value={category} onValueChange={(v) => setCategory(v as CategoryValue)}>
                   <SelectTrigger className="text-base md:text-sm h-12 md:h-10">
-                    <SelectValue placeholder="縺吶∋縺ｦ縺ｮ繧ｫ繝・ざ繝ｪ" />
+                    <SelectValue placeholder="すべてのカテゴリ" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all" className="text-base md:text-sm">縺吶∋縺ｦ縺ｮ繧ｫ繝・ざ繝ｪ</SelectItem>
+                    <SelectItem value="all" className="text-base md:text-sm">すべてのカテゴリ</SelectItem>
                     <SelectItem value="iphone" className="text-base md:text-sm">iPhone</SelectItem>
-                    <SelectItem value="camera" className="text-base md:text-sm">繧ｫ繝｡繝ｩ</SelectItem>
-                    <SelectItem value="game" className="text-base md:text-sm">繧ｲ繝ｼ繝</SelectItem>
+                    <SelectItem value="camera" className="text-base md:text-sm">カメラ</SelectItem>
+                    <SelectItem value="game" className="text-base md:text-sm">ゲーム</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="md:w-[120px]">
                 <Button type="submit" className="w-full text-base md:text-sm h-12 md:h-10">
-                  讀懃ｴ｢
+                  検索
                 </Button>
               </div>
             </form>
 
             <p className="mt-2 text-xs text-muted-foreground">
               {janQuery
-                ? `JAN 縺ｨ縺励※隱崎ｭ假ｼ・{janQuery}・亥ｮ悟・荳閾ｴ讀懃ｴ｢・荏
-                : '繝偵Φ繝茨ｼ壽焚蟄励・縺ｿ8譯・13譯√・JAN縺ｨ縺励※蛻､螳壹＠縲∝ｮ悟・荳閾ｴ縺ｧ謗｢縺励∪縺吶・}
+                ? `JAN として検索中: ${janQuery}（数字8桁または13桁を認識します）`
+                : '商品名キーワード、または数字8桁/13桁のJANでも検索できます。'}
             </p>
           </CardContent>
         </Card>
 
-        {/* 邨先棡 */}
+        {/* 結果表示 */}
         {loading ? (
-          <p className="text-sm text-muted-foreground">讀懃ｴ｢荳ｭ窶ｦ</p>
+          <p className="text-sm text-muted-foreground">検索中…</p>
         ) : errorMsg ? (
           <p className="text-sm text-red-600">{errorMsg}</p>
         ) : results.length === 0 ? (
-          <p className="text-sm text-muted-foreground">隧ｲ蠖薙☆繧句膚蜩√′隕九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆縲・/p>
+          <p className="text-sm text-muted-foreground">該当する結果が見つかりませんでした。</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {results.map((v) => {
-              const productName = v.products?.name ?? '蝠・刀蜷肴悴險ｭ螳・;
-              const cat = v.products?.category ?? '繧ｫ繝・ざ繝ｪ譛ｪ險ｭ螳・;
+              const productName = v.products?.name ?? '商品名不明';
+              const cat = v.products?.category ?? 'カテゴリ不明';
               const img = v.products?.image_url ?? null;
 
               return (
@@ -290,20 +292,20 @@ export default function SearchPage() {
                       )}
                       {v.color && (
                         <>
-                          <span className="text-muted-foreground">繧ｫ繝ｩ繝ｼ</span>
+                          <span className="text-muted-foreground">カラー</span>
                           <span className="font-medium">{v.color}</span>
                         </>
                       )}
                       {v.capacity && (
                         <>
-                          <span className="text-muted-foreground">螳ｹ驥・/span>
+                          <span className="text-muted-foreground">容量</span>
                           <span className="font-medium">{v.capacity}</span>
                         </>
                       )}
                       {typeof v.buyback_price === 'number' && (
                         <>
-                          <span className="text-muted-foreground">雋ｷ蜿門盾閠・ｾ｡譬ｼ</span>
-                          <span className="font-semibold">{v.buyback_price.toLocaleString()} 蜀・/span>
+                          <span className="text-muted-foreground">買取上限目安</span>
+                          <span className="font-semibold">{v.buyback_price.toLocaleString()} 円</span>
                         </>
                       )}
                     </div>
@@ -315,7 +317,7 @@ export default function SearchPage() {
                           className="w-full bg-black text-white hover:bg-black/90 h-12 md:h-10 text-base md:text-sm"
                         >
                           <Link href={`/products/${v.products.category}/${v.products.id}`}>
-                            蝠・刀繝壹・繧ｸ
+                            商品ページへ
                           </Link>
                         </Button>
                       ) : (
@@ -323,7 +325,7 @@ export default function SearchPage() {
                           className="w-full bg-black text-white hover:bg-black/90 disabled:opacity-50 h-12 md:h-10 text-base md:text-sm"
                           disabled
                         >
-                          蝠・刀繝壹・繧ｸ
+                          商品ページへ
                         </Button>
                       )}
                     </div>

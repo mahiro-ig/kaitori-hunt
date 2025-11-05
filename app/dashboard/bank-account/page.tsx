@@ -1,7 +1,5 @@
 ﻿"use client"
 
-'use client'
-
 import React, { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -26,41 +24,43 @@ export default function BankAccountPage() {
   const router = useRouter()
 
   const [formData, setFormData] = useState({
-    bankName:      "",
-    branchName:    "",
-    accountType:   "譎ｮ騾・,
+    bankName: "",
+    branchName: "",
+    accountType: "普通",
     accountNumber: "",
-    accountName:   "",
+    accountName: "",
   })
   const [isFetching, setIsFetching] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 隱崎ｨｼ繧ｬ繝ｼ繝・  useEffect(() => {
+  // セッション確認（未ログインはログイン画面へ）
+  useEffect(() => {
     if (status === "loading") return
     if (status === "unauthenticated") {
       router.push("/auth/login?redirect=/dashboard/bank-account")
     }
   }, [status, router])
 
-  // 蛻晄悄繝・・繧ｿ蜿門ｾ・  useEffect(() => {
+  // 初期データ取得
+  useEffect(() => {
     if (status !== "authenticated") return
     const fetchData = async () => {
       setIsFetching(true)
       try {
         const res = await fetch("/api/auth/bank-account")
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || "蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆")
+        if (!res.ok) throw new Error(data.error || "情報の取得に失敗しました。")
         setFormData({
-          bankName:      data.bankName,
-          branchName:    data.branchName,
-          accountType:   data.accountType,
-          accountNumber: data.accountNumber,
-          accountName:   data.accountName,
+          bankName: data.bankName ?? "",
+          branchName: data.branchName ?? "",
+          accountType: data.accountType ?? "普通",
+          accountNumber: data.accountNumber ?? "",
+          accountName: data.accountName ?? "",
         })
       } catch (err) {
         toast({
-          title: "蜿門ｾ励お繝ｩ繝ｼ",
-          description: err instanceof Error ? err.message : "繧ｨ繝ｩ繝ｼ",
+          title: "取得エラー",
+          description: err instanceof Error ? err.message : "不明なエラーです。",
           variant: "destructive",
         })
       } finally {
@@ -72,7 +72,7 @@ export default function BankAccountPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -85,12 +85,15 @@ export default function BankAccountPage() {
         body: JSON.stringify(formData),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "譖ｴ譁ｰ縺ｫ螟ｱ謨励＠縺ｾ縺励◆")
-      toast({ title: "譖ｴ譁ｰ謌仙粥", description: "謖ｯ霎ｼ蜈域ュ蝣ｱ繧呈峩譁ｰ縺励∪縺励◆" })
+      if (!res.ok) throw new Error(data.error || "保存に失敗しました。")
+      toast({
+        title: "保存しました",
+        description: "振込口座情報を更新しました。",
+      })
     } catch (err) {
       toast({
-        title: "譖ｴ譁ｰ繧ｨ繝ｩ繝ｼ",
-        description: err instanceof Error ? err.message : "繧ｨ繝ｩ繝ｼ",
+        title: "保存エラー",
+        description: err instanceof Error ? err.message : "不明なエラーです。",
         variant: "destructive",
       })
     } finally {
@@ -98,7 +101,7 @@ export default function BankAccountPage() {
     }
   }
 
-  // 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ陦ｨ遉ｺ
+  // ローディング表示
   if (status === "loading" || isFetching) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -117,22 +120,23 @@ export default function BankAccountPage() {
           className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary mr-4"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          繝繝・す繝･繝懊・繝峨↓謌ｻ繧・        </Link>
-        <h1 className="text-2xl font-bold">謖ｯ霎ｼ蜈域ュ蝣ｱ縺ｮ邱ｨ髮・/h1>
+          ダッシュボードに戻る
+        </Link>
+        <h1 className="text-2xl font-bold">振込口座の登録 / 編集</h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>謖ｯ霎ｼ蜈亥哨蠎ｧ諠・ｱ</CardTitle>
+          <CardTitle>振込口座情報</CardTitle>
           <CardDescription>
-            雋ｷ蜿夜≡縺ｮ謖ｯ霎ｼ蜈亥哨蠎ｧ諠・ｱ繧貞・蜉帙＠縺ｦ縺上□縺輔＞
+            売上の振込先として使用します。正確にご入力ください。
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 驫陦悟錐 */}
+            {/* 銀行名 */}
             <div className="space-y-2">
-              <Label htmlFor="bankName">驫陦悟錐</Label>
+              <Label htmlFor="bankName">銀行名</Label>
               <Input
                 id="bankName"
                 name="bankName"
@@ -140,11 +144,13 @@ export default function BankAccountPage() {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
+                placeholder="例）○○銀行"
               />
             </div>
-            {/* 謾ｯ蠎怜錐 */}
+
+            {/* 支店名 */}
             <div className="space-y-2">
-              <Label htmlFor="branchName">謾ｯ蠎怜錐</Label>
+              <Label htmlFor="branchName">支店名</Label>
               <Input
                 id="branchName"
                 name="branchName"
@@ -152,11 +158,13 @@ export default function BankAccountPage() {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
+                placeholder="例）新潟支店"
               />
             </div>
-            {/* 蜿｣蠎ｧ遞ｮ蛻･ */}
+
+            {/* 口座種別 */}
             <div className="space-y-2">
-              <Label htmlFor="accountType">蜿｣蠎ｧ遞ｮ蛻･</Label>
+              <Label htmlFor="accountType">口座種別</Label>
               <Input
                 id="accountType"
                 name="accountType"
@@ -164,11 +172,13 @@ export default function BankAccountPage() {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
+                placeholder="普通 / 当座"
               />
             </div>
-            {/* 蜿｣蠎ｧ逡ｪ蜿ｷ */}
+
+            {/* 口座番号 */}
             <div className="space-y-2">
-              <Label htmlFor="accountNumber">蜿｣蠎ｧ逡ｪ蜿ｷ</Label>
+              <Label htmlFor="accountNumber">口座番号</Label>
               <Input
                 id="accountNumber"
                 name="accountNumber"
@@ -176,11 +186,14 @@ export default function BankAccountPage() {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
+                inputMode="numeric"
+                placeholder="半角数字のみ"
               />
             </div>
-            {/* 蜿｣蠎ｧ蜷咲ｾｩ */}
+
+            {/* 口座名義（カナ） */}
             <div className="space-y-2">
-              <Label htmlFor="accountName">蜿｣蠎ｧ蜷咲ｾｩ・医き繧ｿ繧ｫ繝奇ｼ・/Label>
+              <Label htmlFor="accountName">口座名義（カナ）</Label>
               <Input
                 id="accountName"
                 name="accountName"
@@ -188,12 +201,15 @@ export default function BankAccountPage() {
                 onChange={handleChange}
                 required
                 disabled={isSubmitting}
+                placeholder="例）イガラシ　タロウ"
               />
             </div>
 
             <Alert className="bg-muted">
               <AlertDescription>
-                豕ｨ諢丈ｺ矩・ｼ壼哨蠎ｧ蜷咲ｾｩ縺ｯ莨壼藤逋ｻ骭ｲ譎ゅ・豌丞錐縺ｨ荳閾ｴ縺励※縺・ｋ蠢・ｦ√′縺ゅｊ縺ｾ縺吶・            
+                口座名義は
+                <b>カタカナ・全角・スペース可</b>
+                で、本人確認書類の氏名と一致させてください。
               </AlertDescription>
             </Alert>
 
@@ -201,12 +217,12 @@ export default function BankAccountPage() {
               {isSubmitting ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                  譖ｴ譁ｰ荳ｭ...
+                  保存中...
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  謖ｯ霎ｼ蜈域ュ蝣ｱ繧呈峩譁ｰ縺吶ｋ
+                  振込口座を保存する
                 </>
               )}
             </Button>
