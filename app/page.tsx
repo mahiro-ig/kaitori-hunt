@@ -47,10 +47,10 @@ function NewsSection() {
           <div className="space-y-2">
             {/* ▼ フレーズだけ差し替え（SEO見出しの階層は維持） */}
             <h2 id="news-heading" className="text-3xl font-bold tracking-tighter md:text-4xl">
-              お知らせ
+              ニュース
             </h2>
             <p className="max-w-[900px] text-muted-foreground md:text-xl">
-              最新情報をお届けします
+              最新のお知らせ
             </p>
           </div>
         </div>
@@ -143,11 +143,11 @@ export default function Home() {
                 <div className="space-y-2">
                   {/* ▼ フレーズ更新（ブランド軸） */}
                   <h1 id="hero-heading" className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none lg:whitespace-nowrap lg:leading-none">
-                    新品・未使用ランク特化の高価買取サービス
+                    国内最高値買取・即日現金化
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-lg">
-                    iPhone・カメラ・ゲームを中心に全国対応。査定成立後は<span className="font-semibold">最短即日入金</span>。<br />
-                    かんたん申込で、査定から振込までスムーズに。
+                    iPhone・カメラ・ゲームの専門買取サービス<br />
+                    即日査定・最短入金で新品をスムーズに現金化
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -257,7 +257,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold">iPhone</h3>
                   <p className="text-muted-foreground text-center">
-                    最新から定番モデルまで、<span className="font-semibold">新品・未使用ランク</span>を高価買取。
+                    最新モデルから過去のモデルまで、新品未使用品を高価買取いたします。
                   </p>
                   <Button variant="outline" className="mt-2 group-hover:bg-primary group-hover:text-primary-foreground">
                     詳細を見る
@@ -272,7 +272,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold">カメラ</h3>
                   <p className="text-muted-foreground text-center">
-                    一眼・ミラーレス・コンデジまで、<span className="font-semibold">新品・未使用ランク</span>に特化。
+                    一眼レフ、ミラーレス、フィルムカメラなど、新品未使用品を買取しています。
                   </p>
                   <Button variant="outline" className="mt-2 group-hover:bg-primary group-hover:text-primary-foreground">
                     詳細を見る
@@ -287,7 +287,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold">ゲーム</h3>
                   <p className="text-muted-foreground text-center">
-                    本体・ソフト・周辺機器の<span className="font-semibold">新品・未使用ランク</span>を高価買取。
+                    ゲーム機本体やソフト、周辺機器など新品未使用品を幅広く買取対応しています。
                   </p>
                   <Button variant="outline" className="mt-2 group-hover:bg-primary group-hover:text-primary-foreground">
                     詳細を見る
@@ -305,7 +305,7 @@ export default function Home() {
               <div className="space-y-2">
                 <h2 id="flow-heading" className="text-3xl font-bold tracking-tighter md:text-4xl">買取の流れ</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
-                  かんたん3ステップ。査定成立後は<span className="font-semibold">最短即日入金</span>。
+                  簡単3ステップで、あなたの商品を高価買取いたします。
                 </p>
               </div>
             </div>
@@ -315,7 +315,7 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">1</div>
                 <h3 className="text-xl font-bold">会員登録・ログイン</h3>
                 <p className="text-muted-foreground text-center">
-                  会員になると買取履歴の確認や各種手続きがスムーズに。
+                   簡単な会員登録で、買取履歴の管理や特典が受けられます。
                 </p>
               </div>
 
@@ -323,7 +323,7 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">2</div>
                 <h3 className="text-xl font-bold">買取申込</h3>
                 <p className="text-muted-foreground text-center">
-                  商品をカートに入れて申込。発送方法や店舗持込も選べます。
+                  売りたい商品をカートに入れて、買取申込をしましょう。
                 </p>
               </div>
 
@@ -331,7 +331,7 @@ export default function Home() {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">3</div>
                 <h3 className="text-xl font-bold">郵送・査定・成立</h3>
                 <p className="text-muted-foreground text-center">
-                  専門スタッフが査定。金額にご納得いただければ、成立後<span className="font-semibold">最短即日入金</span>。
+                  商品を郵送もしくはお持ち込みいただき、専門スタッフが査定。買取金額にご納得いただければ買取成立です。
                 </p>
               </div>
             </div>
