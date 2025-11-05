@@ -1,3 +1,5 @@
+﻿"use client"
+
 'use client'
 
 import React, { useState, useEffect } from "react"
@@ -26,30 +28,28 @@ export default function BankAccountPage() {
   const [formData, setFormData] = useState({
     bankName:      "",
     branchName:    "",
-    accountType:   "普通",
+    accountType:   "譎ｮ騾・,
     accountNumber: "",
     accountName:   "",
   })
   const [isFetching, setIsFetching] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 認証ガード
-  useEffect(() => {
+  // 隱崎ｨｼ繧ｬ繝ｼ繝・  useEffect(() => {
     if (status === "loading") return
     if (status === "unauthenticated") {
       router.push("/auth/login?redirect=/dashboard/bank-account")
     }
   }, [status, router])
 
-  // 初期データ取得
-  useEffect(() => {
+  // 蛻晄悄繝・・繧ｿ蜿門ｾ・  useEffect(() => {
     if (status !== "authenticated") return
     const fetchData = async () => {
       setIsFetching(true)
       try {
         const res = await fetch("/api/auth/bank-account")
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error || "取得に失敗しました")
+        if (!res.ok) throw new Error(data.error || "蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆")
         setFormData({
           bankName:      data.bankName,
           branchName:    data.branchName,
@@ -59,8 +59,8 @@ export default function BankAccountPage() {
         })
       } catch (err) {
         toast({
-          title: "取得エラー",
-          description: err instanceof Error ? err.message : "エラー",
+          title: "蜿門ｾ励お繝ｩ繝ｼ",
+          description: err instanceof Error ? err.message : "繧ｨ繝ｩ繝ｼ",
           variant: "destructive",
         })
       } finally {
@@ -85,12 +85,12 @@ export default function BankAccountPage() {
         body: JSON.stringify(formData),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "更新に失敗しました")
-      toast({ title: "更新成功", description: "振込先情報を更新しました" })
+      if (!res.ok) throw new Error(data.error || "譖ｴ譁ｰ縺ｫ螟ｱ謨励＠縺ｾ縺励◆")
+      toast({ title: "譖ｴ譁ｰ謌仙粥", description: "謖ｯ霎ｼ蜈域ュ蝣ｱ繧呈峩譁ｰ縺励∪縺励◆" })
     } catch (err) {
       toast({
-        title: "更新エラー",
-        description: err instanceof Error ? err.message : "エラー",
+        title: "譖ｴ譁ｰ繧ｨ繝ｩ繝ｼ",
+        description: err instanceof Error ? err.message : "繧ｨ繝ｩ繝ｼ",
         variant: "destructive",
       })
     } finally {
@@ -98,7 +98,7 @@ export default function BankAccountPage() {
     }
   }
 
-  // ローディング表示
+  // 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ陦ｨ遉ｺ
   if (status === "loading" || isFetching) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-3xl">
@@ -117,23 +117,22 @@ export default function BankAccountPage() {
           className="flex items-center text-sm font-medium text-muted-foreground hover:text-primary mr-4"
         >
           <ArrowLeft className="mr-1 h-4 w-4" />
-          ダッシュボードに戻る
-        </Link>
-        <h1 className="text-2xl font-bold">振込先情報の編集</h1>
+          繝繝・す繝･繝懊・繝峨↓謌ｻ繧・        </Link>
+        <h1 className="text-2xl font-bold">謖ｯ霎ｼ蜈域ュ蝣ｱ縺ｮ邱ｨ髮・/h1>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>振込先口座情報</CardTitle>
+          <CardTitle>謖ｯ霎ｼ蜈亥哨蠎ｧ諠・ｱ</CardTitle>
           <CardDescription>
-            買取金の振込先口座情報を入力してください
+            雋ｷ蜿夜≡縺ｮ謖ｯ霎ｼ蜈亥哨蠎ｧ諠・ｱ繧貞・蜉帙＠縺ｦ縺上□縺輔＞
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 銀行名 */}
+            {/* 驫陦悟錐 */}
             <div className="space-y-2">
-              <Label htmlFor="bankName">銀行名</Label>
+              <Label htmlFor="bankName">驫陦悟錐</Label>
               <Input
                 id="bankName"
                 name="bankName"
@@ -143,9 +142,9 @@ export default function BankAccountPage() {
                 disabled={isSubmitting}
               />
             </div>
-            {/* 支店名 */}
+            {/* 謾ｯ蠎怜錐 */}
             <div className="space-y-2">
-              <Label htmlFor="branchName">支店名</Label>
+              <Label htmlFor="branchName">謾ｯ蠎怜錐</Label>
               <Input
                 id="branchName"
                 name="branchName"
@@ -155,9 +154,9 @@ export default function BankAccountPage() {
                 disabled={isSubmitting}
               />
             </div>
-            {/* 口座種別 */}
+            {/* 蜿｣蠎ｧ遞ｮ蛻･ */}
             <div className="space-y-2">
-              <Label htmlFor="accountType">口座種別</Label>
+              <Label htmlFor="accountType">蜿｣蠎ｧ遞ｮ蛻･</Label>
               <Input
                 id="accountType"
                 name="accountType"
@@ -167,9 +166,9 @@ export default function BankAccountPage() {
                 disabled={isSubmitting}
               />
             </div>
-            {/* 口座番号 */}
+            {/* 蜿｣蠎ｧ逡ｪ蜿ｷ */}
             <div className="space-y-2">
-              <Label htmlFor="accountNumber">口座番号</Label>
+              <Label htmlFor="accountNumber">蜿｣蠎ｧ逡ｪ蜿ｷ</Label>
               <Input
                 id="accountNumber"
                 name="accountNumber"
@@ -179,9 +178,9 @@ export default function BankAccountPage() {
                 disabled={isSubmitting}
               />
             </div>
-            {/* 口座名義 */}
+            {/* 蜿｣蠎ｧ蜷咲ｾｩ */}
             <div className="space-y-2">
-              <Label htmlFor="accountName">口座名義（カタカナ）</Label>
+              <Label htmlFor="accountName">蜿｣蠎ｧ蜷咲ｾｩ・医き繧ｿ繧ｫ繝奇ｼ・/Label>
               <Input
                 id="accountName"
                 name="accountName"
@@ -194,8 +193,7 @@ export default function BankAccountPage() {
 
             <Alert className="bg-muted">
               <AlertDescription>
-                注意事項：口座名義は会員登録時の氏名と一致している必要があります。
-            
+                豕ｨ諢丈ｺ矩・ｼ壼哨蠎ｧ蜷咲ｾｩ縺ｯ莨壼藤逋ｻ骭ｲ譎ゅ・豌丞錐縺ｨ荳閾ｴ縺励※縺・ｋ蠢・ｦ√′縺ゅｊ縺ｾ縺吶・            
               </AlertDescription>
             </Alert>
 
@@ -203,12 +201,12 @@ export default function BankAccountPage() {
               {isSubmitting ? (
                 <>
                   <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent" />
-                  更新中...
+                  譖ｴ譁ｰ荳ｭ...
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  振込先情報を更新する
+                  謖ｯ霎ｼ蜈域ュ蝣ｱ繧呈峩譁ｰ縺吶ｋ
                 </>
               )}
             </Button>

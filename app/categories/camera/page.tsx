@@ -1,3 +1,5 @@
+﻿"use client"
+
 // app/categories/camera/page.tsx
 'use client';
 
@@ -5,7 +7,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react'; // ShoppingCart を削除
+import { ArrowLeft } from 'lucide-react'; // ShoppingCart 繧貞炎髯､
 import { toast } from '@/components/ui/use-toast';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import type { Database } from '@/lib/database.types';
@@ -38,18 +40,17 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// ── 型定義 ──
+// 笏笏 蝙句ｮ夂ｾｩ 笏笏
 type Product = Database['public']['Tables']['products']['Row'];
 type Variant = Database['public']['Tables']['product_variants']['Row'];
 
-// 値の正規化（trim + NFKC）
-const normalize = (v: unknown) => {
+// 蛟､縺ｮ豁｣隕丞喧・・rim + NFKC・・const normalize = (v: unknown) => {
   const s = String(v ?? '').trim();
   // @ts-ignore
   return typeof s.normalize === 'function' ? s.normalize('NFKC') : s;
 };
 
-// 表示用："N/A" 表示に統一
+// 陦ｨ遉ｺ逕ｨ・・N/A" 陦ｨ遉ｺ縺ｫ邨ｱ荳
 const toDisplay = (v: unknown) => {
   const s = normalize(v);
   return s ? s : 'N/A';
@@ -106,20 +107,18 @@ export default function CameraCategoryPage() {
             .from('product_variants')
             .select('*')
             .in('product_id', ids)
-            .eq('is_hidden', false); // ★ 表示中のバリアントのみ取得
-          if (varErr) throw varErr;
+            .eq('is_hidden', false); // 笘・陦ｨ遉ｺ荳ｭ縺ｮ繝舌Μ繧｢繝ｳ繝医・縺ｿ蜿門ｾ・          if (varErr) throw varErr;
           if (!mounted) return;
           setAllVariants(vars ?? []);
 
-          // ★ 可視バリアントが1件もない商品は一覧から除外
-          const visibleIds = new Set((vars ?? []).map((v) => v.product_id));
+          // 笘・蜿ｯ隕悶ヰ繝ｪ繧｢繝ｳ繝医′1莉ｶ繧ゅ↑縺・膚蜩√・荳隕ｧ縺九ｉ髯､螟・          const visibleIds = new Set((vars ?? []).map((v) => v.product_id));
           setProducts((prev) => prev.filter((p) => visibleIds.has(p.id)));
         } else {
           setAllVariants([]);
         }
       } catch {
         if (!mounted) return;
-        setError('データの取得に失敗しました');
+        setError('繝・・繧ｿ縺ｮ蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -159,11 +158,11 @@ export default function CameraCategoryPage() {
     const modelKey = toDisplay(selectedModel);
 
     if (!selectedProduct) {
-      toast({ title: 'エラー', description: '商品が選択されていません。', variant: 'destructive' });
+      toast({ title: '繧ｨ繝ｩ繝ｼ', description: '蝠・刀縺碁∈謚槭＆繧後※縺・∪縺帙ｓ縲・, variant: 'destructive' });
       return;
     }
     if (!colorKey || !modelKey) {
-      toast({ title: '選択してください', description: 'カラーとモデルを選択してください', variant: 'destructive' });
+      toast({ title: '驕ｸ謚槭＠縺ｦ縺上□縺輔＞', description: '繧ｫ繝ｩ繝ｼ縺ｨ繝｢繝・Ν繧帝∈謚槭＠縺ｦ縺上□縺輔＞', variant: 'destructive' });
       return;
     }
 
@@ -171,12 +170,12 @@ export default function CameraCategoryPage() {
 
     if (status !== 'authenticated') {
       toast({
-        title: 'ログインが必要です',
-        description: '商品をカートに追加するにはログインしてください。',
+        title: '繝ｭ繧ｰ繧､繝ｳ縺悟ｿ・ｦ√〒縺・,
+        description: '蝠・刀繧偵き繝ｼ繝医↓霑ｽ蜉縺吶ｋ縺ｫ縺ｯ繝ｭ繧ｰ繧､繝ｳ縺励※縺上□縺輔＞縲・,
         variant: 'destructive',
       });
       const url = typeof window !== 'undefined' ? window.location.href : '/';
-      // ✅ NextAuth の pages.signIn に依存せず、一般ログインへ自前遷移
+      // 笨・NextAuth 縺ｮ pages.signIn 縺ｫ萓晏ｭ倥○縺壹∽ｸ闊ｬ繝ｭ繧ｰ繧､繝ｳ縺ｸ閾ｪ蜑埼・遘ｻ
       router.push(`/auth/login?callbackUrl=${encodeURIComponent(url)}`);
       return;
     }
@@ -192,8 +191,7 @@ export default function CameraCategoryPage() {
           .from('product_variants')
           .select('id,color,capacity')
           .eq('product_id', selectedProduct.id)
-          .eq('is_hidden', false); // ★ 非表示を除外
-
+          .eq('is_hidden', false); // 笘・髱櫁｡ｨ遉ｺ繧帝勁螟・
         if (isNA(colorKey)) {
           // @ts-ignore
           q = q.or('color.is.null,color.eq.N/A');
@@ -214,8 +212,8 @@ export default function CameraCategoryPage() {
 
       if (!variant?.id) {
         toast({
-          title: '組み合わせが見つかりません',
-          description: `選択: ${colorKey} / ${modelKey}`,
+          title: '邨・∩蜷医ｏ縺帙′隕九▽縺九ｊ縺ｾ縺帙ｓ',
+          description: `驕ｸ謚・ ${colorKey} / ${modelKey}`,
           variant: 'destructive',
         });
         return;
@@ -224,19 +222,19 @@ export default function CameraCategoryPage() {
       const ok = await addToCart(String(variant.id), colorKey, modelKey);
       if (ok) {
         toast({
-          title: 'カートに追加しました',
-          description: `${selectedProduct.name}（${colorKey}, ${modelKey}）`,
+          title: '繧ｫ繝ｼ繝医↓霑ｽ蜉縺励∪縺励◆',
+          description: `${selectedProduct.name}・・{colorKey}, ${modelKey}・荏,
         });
         setIsDialogOpen(false);
       } else {
         toast({
-          title: 'エラー',
-          description: 'カートに追加できませんでした',
+          title: '繧ｨ繝ｩ繝ｼ',
+          description: '繧ｫ繝ｼ繝医↓霑ｽ蜉縺ｧ縺阪∪縺帙ｓ縺ｧ縺励◆',
           variant: 'destructive',
         });
       }
     } catch {
-      toast({ title: 'エラー', description: 'カート追加中にエラーが発生しました', variant: 'destructive' });
+      toast({ title: '繧ｨ繝ｩ繝ｼ', description: '繧ｫ繝ｼ繝郁ｿｽ蜉荳ｭ縺ｫ繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆', variant: 'destructive' });
     } finally {
       setIsAddingToCart(false);
     }
@@ -268,7 +266,7 @@ export default function CameraCategoryPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* ヘッダー（カートアイコン削除済み） */}
+      {/* 繝倥ャ繝繝ｼ・医き繝ｼ繝医い繧､繧ｳ繝ｳ蜑企勁貂医∩・・*/}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <Link
@@ -276,13 +274,12 @@ export default function CameraCategoryPage() {
             className="flex items-center text-sm text-muted-foreground hover:text-primary mr-4"
           >
             <ArrowLeft className="mr-1 h-4 w-4" />
-            ホームに戻る
-          </Link>
-          <h1 className="text-3xl font-bold">カメラ買取</h1>
+            繝帙・繝縺ｫ謌ｻ繧・          </Link>
+          <h1 className="text-3xl font-bold">繧ｫ繝｡繝ｩ雋ｷ蜿・/h1>
         </div>
       </div>
 
-      {/* 商品グリッド：モバイル2列 / タブレット3列 / PC4列 */}
+      {/* 蝠・刀繧ｰ繝ｪ繝・ラ・壹Δ繝舌う繝ｫ2蛻・/ 繧ｿ繝悶Ξ繝・ヨ3蛻・/ PC4蛻・*/}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         {products.map((product) => {
           let imageUrl = '/placeholder.svg?height=300&width=300';
@@ -318,7 +315,7 @@ export default function CameraCategoryPage() {
                     {product.description}
                   </p>
                   <p className="font-bold text-base md:text-lg">
-                    最大 ¥{getMaxPrice(product).toLocaleString()}
+                    譛螟ｧ ﾂ･{getMaxPrice(product).toLocaleString()}
                   </p>
                 </CardContent>
               </Link>
@@ -326,7 +323,7 @@ export default function CameraCategoryPage() {
               <CardFooter className="p-3 md:p-4 pt-0 flex gap-2 relative z-10">
                 <Link href={`/products/camera/${product.id}`} className="hidden md:block">
                   <Button variant="outline" size="sm">
-                    詳細を見る
+                    隧ｳ邏ｰ繧定ｦ九ｋ
                   </Button>
                 </Link>
 
@@ -340,7 +337,7 @@ export default function CameraCategoryPage() {
                     openCartDialog(product);
                   }}
                 >
-                  カートに入れる
+                  繧ｫ繝ｼ繝医↓蜈･繧後ｋ
                 </Button>
               </CardFooter>
             </Card>
@@ -354,9 +351,9 @@ export default function CameraCategoryPage() {
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle>オプションを選択</DialogTitle>
+            <DialogTitle>繧ｪ繝励す繝ｧ繝ｳ繧帝∈謚・/DialogTitle>
             <DialogDescription className="sr-only">
-              カラーとモデルを選択してください
+              繧ｫ繝ｩ繝ｼ縺ｨ繝｢繝・Ν繧帝∈謚槭＠縺ｦ縺上□縺輔＞
             </DialogDescription>
           </DialogHeader>
 
@@ -365,7 +362,7 @@ export default function CameraCategoryPage() {
               {selectedProduct && (
                 <>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium block">カラー</label>
+                    <label className="text-sm font-medium block">繧ｫ繝ｩ繝ｼ</label>
 
                     {!isMobile ? (
                       <Select
@@ -373,7 +370,7 @@ export default function CameraCategoryPage() {
                         onValueChange={(v) => setSelectedColor(String(v))}
                       >
                         <SelectTrigger className="w/full">
-                          <SelectValue placeholder="カラーを選択" />
+                          <SelectValue placeholder="繧ｫ繝ｩ繝ｼ繧帝∈謚・ />
                         </SelectTrigger>
                         <SelectContent>
                           {availableColors.map((color) => (
@@ -389,7 +386,7 @@ export default function CameraCategoryPage() {
                         value={selectedColor}
                         onChange={(e) => setSelectedColor(e.target.value)}
                       >
-                        <option value="">カラーを選択</option>
+                        <option value="">繧ｫ繝ｩ繝ｼ繧帝∈謚・/option>
                         {availableColors.map((color) => (
                           <option key={color} value={color}>
                             {color}
@@ -400,7 +397,7 @@ export default function CameraCategoryPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium block">モデル</label>
+                    <label className="text-sm font-medium block">繝｢繝・Ν</label>
 
                     {!isMobile ? (
                       <Select
@@ -409,7 +406,7 @@ export default function CameraCategoryPage() {
                         disabled={!selectedColor}
                       >
                         <SelectTrigger className="w/full">
-                          <SelectValue placeholder="モデルを選択" />
+                          <SelectValue placeholder="繝｢繝・Ν繧帝∈謚・ />
                         </SelectTrigger>
                         <SelectContent>
                           {availableModels.map((m) => (
@@ -426,7 +423,7 @@ export default function CameraCategoryPage() {
                         onChange={(e) => setSelectedModel(e.target.value)}
                         disabled={!selectedColor}
                       >
-                        <option value="">モデルを選択</option>
+                        <option value="">繝｢繝・Ν繧帝∈謚・/option>
                         {availableModels.map((m) => (
                           <option key={m} value={m}>
                             {m}
@@ -446,7 +443,7 @@ export default function CameraCategoryPage() {
                 disabled={isAddingToCart}
                 type="button"
               >
-                キャンセル
+                繧ｭ繝｣繝ｳ繧ｻ繝ｫ
               </Button>
 
               <Button
@@ -459,10 +456,10 @@ export default function CameraCategoryPage() {
                 }
               >
                 {status === 'loading'
-                  ? 'ログイン確認中…'
+                  ? '繝ｭ繧ｰ繧､繝ｳ遒ｺ隱堺ｸｭ窶ｦ'
                   : isAddingToCart
-                  ? '追加中…'
-                  : 'カートに追加'}
+                  ? '霑ｽ蜉荳ｭ窶ｦ'
+                  : '繧ｫ繝ｼ繝医↓霑ｽ蜉'}
               </Button>
             </DialogFooter>
           </form>

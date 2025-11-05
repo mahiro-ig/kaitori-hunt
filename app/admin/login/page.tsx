@@ -1,3 +1,5 @@
+﻿"use client"
+
 // app/admin/login/page.tsx
 'use client';
 
@@ -21,17 +23,17 @@ export default function AdminLoginPage() {
     return n;
   }, [sp]);
 
-  // クエリのエラー表示
+  // 繧ｯ繧ｨ繝ｪ縺ｮ繧ｨ繝ｩ繝ｼ陦ｨ遉ｺ
   useEffect(() => {
     const ed = sp.get('error_description');
     const e = sp.get('error');
     if (ed) setErrMsg(decodeURIComponent(ed));
-    else if (e === 'not_admin') setErrMsg('管理者権限が必要です。');
-    else if (e === 'unauthorized') setErrMsg('ログインが必要です。');
+    else if (e === 'not_admin') setErrMsg('邂｡逅・・ｨｩ髯舌′蠢・ｦ√〒縺吶・);
+    else if (e === 'unauthorized') setErrMsg('繝ｭ繧ｰ繧､繝ｳ縺悟ｿ・ｦ√〒縺吶・);
     else setErrMsg(null);
   }, [sp]);
 
-  // 認証済みかつ admin の場合のみ自動遷移
+  // 隱崎ｨｼ貂医∩縺九▽ admin 縺ｮ蝣ｴ蜷医・縺ｿ閾ｪ蜍暮・遘ｻ
   useEffect(() => {
     if (status !== 'authenticated') return;
     const role = (data?.user as any)?.role;
@@ -56,14 +58,14 @@ export default function AdminLoginPage() {
       });
 
       if (!res || res.error || res.ok === false) {
-        setErrMsg('メールアドレスまたはパスワードが正しくありません。');
+        setErrMsg('繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ縺ｾ縺溘・繝代せ繝ｯ繝ｼ繝峨′豁｣縺励￥縺ゅｊ縺ｾ縺帙ｓ縲・);
         return;
       }
 
-      // ここでは role 判定せず、middleware 側で最終確認
+      // 縺薙％縺ｧ縺ｯ role 蛻､螳壹○縺壹［iddleware 蛛ｴ縺ｧ譛邨ら｢ｺ隱・
       router.replace(next);
     } catch (err: any) {
-      setErrMsg(err?.message ?? 'ログインに失敗しました。');
+      setErrMsg(err?.message ?? '繝ｭ繧ｰ繧､繝ｳ縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・);
     } finally {
       setSending(false);
     }
@@ -71,13 +73,13 @@ export default function AdminLoginPage() {
 
   return (
     <main className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-3">管理ログイン</h1>
+      <h1 className="text-2xl font-semibold mb-3">邂｡逅・Ο繧ｰ繧､繝ｳ</h1>
 
       {errMsg && <div className="mb-4 text-sm text-red-600">{errMsg}</div>}
 
       <section className="space-y-6">
         <form onSubmit={handleSubmit} className="border rounded-lg p-4">
-          <h2 className="font-medium mb-2">パスワードでログイン</h2>
+          <h2 className="font-medium mb-2">繝代せ繝ｯ繝ｼ繝峨〒繝ｭ繧ｰ繧､繝ｳ</h2>
           <div className="space-y-3">
             <input
               type="email"
@@ -91,7 +93,7 @@ export default function AdminLoginPage() {
             <input
               id="admin-password"
               type="password"
-              placeholder="パスワード"
+              placeholder="繝代せ繝ｯ繝ｼ繝・
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="border rounded px-3 py-2 w-full"
@@ -103,7 +105,7 @@ export default function AdminLoginPage() {
               disabled={sending || !email || !password}
               className="px-4 py-2 rounded bg-gray-800 text-white disabled:opacity-50 w-full"
             >
-              {sending ? 'ログイン中…' : 'ログイン'}
+              {sending ? '繝ｭ繧ｰ繧､繝ｳ荳ｭ窶ｦ' : '繝ｭ繧ｰ繧､繝ｳ'}
             </button>
           </div>
         </form>

@@ -1,3 +1,5 @@
+﻿"use client"
+
 // components/auth/LoginForm.tsx
 'use client';
 
@@ -20,7 +22,7 @@ export default function LoginForm() {
     });
 
     if (result?.error) {
-      setErrorMsg("ログインに失敗しました。メールアドレスとパスワードを確認してください。");
+      setErrorMsg("繝ｭ繧ｰ繧､繝ｳ縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲ゅΓ繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ縺ｨ繝代せ繝ｯ繝ｼ繝峨ｒ遒ｺ隱阪＠縺ｦ縺上□縺輔＞縲・);
     } else {
       window.location.href = "/dashboard";
     }
@@ -29,7 +31,7 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block">メールアドレス</label>
+        <label className="block">繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ</label>
         <input
           type="email"
           value={email}
@@ -39,7 +41,7 @@ export default function LoginForm() {
         />
       </div>
       <div>
-        <label className="block">パスワード</label>
+        <label className="block">繝代せ繝ｯ繝ｼ繝・/label>
         <input
           type="password"
           value={password}
@@ -50,7 +52,7 @@ export default function LoginForm() {
       </div>
       {errorMsg && <p className="text-red-600">{errorMsg}</p>}
       <button type="submit" className="px-4 py-2 bg-blue-600 text-white">
-        ログイン
+        繝ｭ繧ｰ繧､繝ｳ
       </button>
     </form>
   );

@@ -1,3 +1,5 @@
+﻿"use client"
+
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -49,14 +51,13 @@ export default function LoginPage() {
 
   const validate = () => {
     const newErrors: typeof errors = {};
-    if (!formData.email.trim()) newErrors.email = "メールアドレスを入力してください";
-    if (!formData.password) newErrors.password = "パスワードを入力してください";
+    if (!formData.email.trim()) newErrors.email = "繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ繧貞・蜉帙＠縺ｦ縺上□縺輔＞";
+    if (!formData.password) newErrors.password = "繝代せ繝ｯ繝ｼ繝峨ｒ蜈･蜉帙＠縺ｦ縺上□縺輔＞";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Cookie 反映まで待つ関数（最大7秒）
-  async function waitForSession(maxMs = 7000, stepMs = 200) {
+  // 笨・Cookie 蜿肴丐縺ｾ縺ｧ蠕・▽髢｢謨ｰ・域怙螟ｧ7遘抵ｼ・  async function waitForSession(maxMs = 7000, stepMs = 200) {
     const deadline = Date.now() + maxMs;
     while (Date.now() < deadline) {
       const session = await getSession();
@@ -81,10 +82,10 @@ export default function LoginPage() {
       });
 
       if (!result || result.error) {
-        setLoginError("メールアドレスまたはパスワードが正しくありません。");
+        setLoginError("繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ縺ｾ縺溘・繝代せ繝ｯ繝ｼ繝峨′豁｣縺励￥縺ゅｊ縺ｾ縺帙ｓ縲・);
         toast({
-          title: "ログインに失敗しました",
-          description: result?.error ?? "もう一度お試しください。",
+          title: "繝ｭ繧ｰ繧､繝ｳ縺ｫ螟ｱ謨励＠縺ｾ縺励◆",
+          description: result?.error ?? "繧ゅ≧荳蠎ｦ縺願ｩｦ縺励￥縺縺輔＞縲・,
           variant: "destructive",
         });
         setIsLoading(false);
@@ -92,32 +93,32 @@ export default function LoginPage() {
       }
 
       toast({
-        title: "ログインしました",
-        description: "セッション確立を確認中です…",
+        title: "繝ｭ繧ｰ繧､繝ｳ縺励∪縺励◆",
+        description: "繧ｻ繝・す繝ｧ繝ｳ遒ｺ遶九ｒ遒ｺ隱堺ｸｭ縺ｧ縺吮ｦ",
       });
 
-      // ✅ Cookie がブラウザに反映されるまで待つ
+      // 笨・Cookie 縺後ヶ繝ｩ繧ｦ繧ｶ縺ｫ蜿肴丐縺輔ｌ繧九∪縺ｧ蠕・▽
       const ok = await waitForSession();
 
       if (!ok) {
         toast({
-          title: "セッション確立に失敗しました",
-          description: "通信環境をご確認のうえ、再度お試しください。",
+          title: "繧ｻ繝・す繝ｧ繝ｳ遒ｺ遶九↓螟ｱ謨励＠縺ｾ縺励◆",
+          description: "騾壻ｿ｡迺ｰ蠅・ｒ縺皮｢ｺ隱阪・縺・∴縲∝・蠎ｦ縺願ｩｦ縺励￥縺縺輔＞縲・,
           variant: "destructive",
         });
         setIsLoading(false);
         return;
       }
 
-      // ✅ 確実にセッション確立後、サーバ側で再読み込み
+      // 笨・遒ｺ螳溘↓繧ｻ繝・す繝ｧ繝ｳ遒ｺ遶句ｾ後√し繝ｼ繝仙・縺ｧ蜀崎ｪｭ縺ｿ霎ｼ縺ｿ
       window.location.assign(redirectTo);
     } catch (err) {
       toast({
-        title: "エラーが発生しました",
+        title: "繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆",
         description: String((err as Error)?.message ?? err),
         variant: "destructive",
       });
-      setLoginError("エラーが発生しました。時間をおいて再試行してください。");
+      setLoginError("繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆縲よ凾髢薙ｒ縺翫＞縺ｦ蜀崎ｩｦ陦後＠縺ｦ縺上□縺輔＞縲・);
       setIsLoading(false);
     }
   };
@@ -125,9 +126,9 @@ export default function LoginPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-md">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-semibold">アカウントログイン</h1>
+        <h1 className="text-2xl font-semibold">繧｢繧ｫ繧ｦ繝ｳ繝医Ο繧ｰ繧､繝ｳ</h1>
         <p className="text-sm text-muted-foreground">
-          メールアドレスとパスワードを入力してログインしてください
+          繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ縺ｨ繝代せ繝ｯ繝ｼ繝峨ｒ蜈･蜉帙＠縺ｦ繝ｭ繧ｰ繧､繝ｳ縺励※縺上□縺輔＞
         </p>
       </div>
 
@@ -139,7 +140,7 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="email">メールアドレス</Label>
+          <Label htmlFor="email">繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ</Label>
           <Input
             id="email"
             name="email"
@@ -155,12 +156,12 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-2 relative">
-          <Label htmlFor="password">パスワード</Label>
+          <Label htmlFor="password">繝代せ繝ｯ繝ｼ繝・/Label>
           <Input
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
-            placeholder="パスワードを入力"
+            placeholder="繝代せ繝ｯ繝ｼ繝峨ｒ蜈･蜉・
             value={formData.password}
             onChange={handleChange}
             className={errors.password ? "border-destructive" : ""}
@@ -189,7 +190,7 @@ export default function LoginPage() {
             disabled={isLoading}
           />
           <Label htmlFor="rememberMe" className="text-sm">
-            ログイン状態を保持する
+            繝ｭ繧ｰ繧､繝ｳ迥ｶ諷九ｒ菫晄戟縺吶ｋ
           </Label>
         </div>
 
@@ -197,23 +198,22 @@ export default function LoginPage() {
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ログイン中…
+              繝ｭ繧ｰ繧､繝ｳ荳ｭ窶ｦ
             </>
           ) : (
-            "ログイン"
+            "繝ｭ繧ｰ繧､繝ｳ"
           )}
         </Button>
 
         <p className="text-center text-sm">
           <Link href="/auth/forgot-password" className="underline hover:text-primary">
-            パスワードをお忘れの方はこちら
-          </Link>
+            繝代せ繝ｯ繝ｼ繝峨ｒ縺雁ｿ倥ｌ縺ｮ譁ｹ縺ｯ縺薙■繧・          </Link>
         </p>
 
         <p className="text-center text-sm">
-          アカウントをお持ちでないですか?{" "}
+          繧｢繧ｫ繧ｦ繝ｳ繝医ｒ縺頑戟縺｡縺ｧ縺ｪ縺・〒縺吶°?{" "}
           <Link href="/auth/register" className="underline hover:text-primary">
-            新規登録
+            譁ｰ隕冗匳骭ｲ
           </Link>
         </p>
       </form>

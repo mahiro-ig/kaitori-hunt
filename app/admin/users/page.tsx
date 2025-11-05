@@ -1,3 +1,5 @@
+﻿"use client"
+
 // app/admin/users/page.tsx
 'use client'
 
@@ -63,8 +65,7 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
 
-  // 編集ダイアログ用ステート
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  // 邱ｨ髮・ム繧､繧｢繝ｭ繧ｰ逕ｨ繧ｹ繝・・繝・  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null)
   const [editName, setEditName] = useState('')
   const [editEmail, setEditEmail] = useState('')
@@ -72,12 +73,11 @@ export default function UsersPage() {
   const [editAddress, setEditAddress] = useState('')
   const [editBankName, setEditBankName] = useState('')
   const [editBranchName, setEditBranchName] = useState('')
-  const [editAccountType, setEditAccountType] = useState<'普通' | '当座' | ''>('')
+  const [editAccountType, setEditAccountType] = useState<'譎ｮ騾・ | '蠖灘ｺｧ' | ''>('')
   const [editAccountNumber, setEditAccountNumber] = useState('')
   const [editAccountName, setEditAccountName] = useState('')
 
-  // 認証ガード＆一覧取得
-  useEffect(() => {
+  // 隱崎ｨｼ繧ｬ繝ｼ繝会ｼ・ｸ隕ｧ蜿門ｾ・  useEffect(() => {
     if (status === 'loading') return
     if (status !== 'authenticated') {
       router.push('/auth/login?redirect=/admin/users')
@@ -91,14 +91,14 @@ export default function UsersPage() {
     try {
       const res = await fetch('/api/admin/users', { cache: 'no-store' })
       if (!res.ok) {
-        toast({ variant: 'destructive', title: 'ユーザー一覧の取得に失敗しました' })
+        toast({ variant: 'destructive', title: '繝ｦ繝ｼ繧ｶ繝ｼ荳隕ｧ縺ｮ蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆' })
         setUsers([])
       } else {
         const json = await res.json()
         setUsers(json.users)
       }
     } catch {
-      toast({ variant: 'destructive', title: 'ユーザー一覧の取得に失敗しました' })
+      toast({ variant: 'destructive', title: '繝ｦ繝ｼ繧ｶ繝ｼ荳隕ｧ縺ｮ蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆' })
       setUsers([])
     } finally {
       setLoading(false)
@@ -120,7 +120,7 @@ export default function UsersPage() {
     setEditAddress(u.address ?? '')
     setEditBankName(u.bank_name ?? '')
     setEditBranchName(u.branch_name ?? '')
-    setEditAccountType((u.account_type as '普通' | '当座') ?? '')
+    setEditAccountType((u.account_type as '譎ｮ騾・ | '蠖灘ｺｧ') ?? '')
     setEditAccountNumber(u.account_number ?? '')
     setEditAccountName(u.account_name ?? '')
     setIsEditDialogOpen(true)
@@ -145,7 +145,7 @@ export default function UsersPage() {
         }),
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error || '更新に失敗しました')
+      if (!res.ok) throw new Error(json.error || '譖ｴ譁ｰ縺ｫ螟ｱ謨励＠縺ｾ縺励◆')
       setUsers(prev =>
         prev.map(u =>
           u.public_id === selectedUser.public_id
@@ -164,10 +164,10 @@ export default function UsersPage() {
             : u
         )
       )
-      toast({ title: 'ユーザー情報を更新しました' })
+      toast({ title: '繝ｦ繝ｼ繧ｶ繝ｼ諠・ｱ繧呈峩譁ｰ縺励∪縺励◆' })
       setIsEditDialogOpen(false)
     } catch (e: any) {
-      toast({ variant: 'destructive', title: '更新に失敗しました', description: e.message })
+      toast({ variant: 'destructive', title: '譖ｴ譁ｰ縺ｫ螟ｱ謨励＠縺ｾ縺励◆', description: e.message })
     }
   }
 
@@ -183,15 +183,15 @@ export default function UsersPage() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <h1 className="text-3xl font-bold">ユーザー管理</h1>
+      <h1 className="text-3xl font-bold">繝ｦ繝ｼ繧ｶ繝ｼ邂｡逅・/h1>
 
       <Card>
         <CardHeader>
-          <CardTitle>ユーザー一覧</CardTitle>
+          <CardTitle>繝ｦ繝ｼ繧ｶ繝ｼ荳隕ｧ</CardTitle>
         </CardHeader>
         <CardContent>
           <Input
-            placeholder="会員ID・名前・メールで検索..."
+            placeholder="莨壼藤ID繝ｻ蜷榊燕繝ｻ繝｡繝ｼ繝ｫ縺ｧ讀懃ｴ｢..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="mb-4 max-w-sm"
@@ -201,18 +201,18 @@ export default function UsersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>会員ID</TableHead>
-                  <TableHead>名前</TableHead>
-                  <TableHead>メール</TableHead>
-                  <TableHead>電話番号</TableHead>
-                  <TableHead>住所</TableHead>
-                  <TableHead>登録日</TableHead>
-                  <TableHead>銀行名</TableHead>
-                  <TableHead>支店名</TableHead>
-                  <TableHead>口座種別</TableHead>
-                  <TableHead>口座番号</TableHead>
-                  <TableHead>口座名義</TableHead>
-                  <TableHead>操作</TableHead>
+                  <TableHead>莨壼藤ID</TableHead>
+                  <TableHead>蜷榊燕</TableHead>
+                  <TableHead>繝｡繝ｼ繝ｫ</TableHead>
+                  <TableHead>髮ｻ隧ｱ逡ｪ蜿ｷ</TableHead>
+                  <TableHead>菴乗園</TableHead>
+                  <TableHead>逋ｻ骭ｲ譌･</TableHead>
+                  <TableHead>驫陦悟錐</TableHead>
+                  <TableHead>謾ｯ蠎怜錐</TableHead>
+                  <TableHead>蜿｣蠎ｧ遞ｮ蛻･</TableHead>
+                  <TableHead>蜿｣蠎ｧ逡ｪ蜿ｷ</TableHead>
+                  <TableHead>蜿｣蠎ｧ蜷咲ｾｩ</TableHead>
+                  <TableHead>謫堺ｽ・/TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -234,15 +234,14 @@ export default function UsersPage() {
                       <TableCell>{u.account_name ?? '-'}</TableCell>
                       <TableCell>
                         <Button variant="outline" size="sm" onClick={() => openEditDialog(u)}>
-                          編集
-                        </Button>
+                          邱ｨ髮・                        </Button>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
                     <TableCell colSpan={12} className="text-center py-4">
-                      ユーザーが見つかりませんでした
+                      繝ｦ繝ｼ繧ｶ繝ｼ縺瑚ｦ九▽縺九ｊ縺ｾ縺帙ｓ縺ｧ縺励◆
                     </TableCell>
                   </TableRow>
                 )}
@@ -255,39 +254,38 @@ export default function UsersPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>ユーザー情報編集</DialogTitle>
+            <DialogTitle>繝ｦ繝ｼ繧ｶ繝ｼ諠・ｱ邱ｨ髮・/DialogTitle>
             <DialogDescription>
-              会員情報と振込先情報を編集して保存します。
-            </DialogDescription>
+              莨壼藤諠・ｱ縺ｨ謖ｯ霎ｼ蜈域ュ蝣ｱ繧堤ｷｨ髮・＠縺ｦ菫晏ｭ倥＠縺ｾ縺吶・            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <Label>会員情報</Label>
-            <Input value={editName} onChange={e => setEditName(e.target.value)} placeholder="名前" />
-            <Input value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="メール" />
-            <Input value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="電話番号" />
-            <Input value={editAddress} onChange={e => setEditAddress(e.target.value)} placeholder="住所" />
+            <Label>莨壼藤諠・ｱ</Label>
+            <Input value={editName} onChange={e => setEditName(e.target.value)} placeholder="蜷榊燕" />
+            <Input value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="繝｡繝ｼ繝ｫ" />
+            <Input value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="髮ｻ隧ｱ逡ｪ蜿ｷ" />
+            <Input value={editAddress} onChange={e => setEditAddress(e.target.value)} placeholder="菴乗園" />
 
-            <Label className="mt-4">振込先情報</Label>
-            <Input value={editBankName} onChange={e => setEditBankName(e.target.value)} placeholder="銀行名" />
-            <Input value={editBranchName} onChange={e => setEditBranchName(e.target.value)} placeholder="支店名" />
+            <Label className="mt-4">謖ｯ霎ｼ蜈域ュ蝣ｱ</Label>
+            <Input value={editBankName} onChange={e => setEditBankName(e.target.value)} placeholder="驫陦悟錐" />
+            <Input value={editBranchName} onChange={e => setEditBranchName(e.target.value)} placeholder="謾ｯ蠎怜錐" />
             <Select
               value={editAccountType}
-              onValueChange={value => setEditAccountType(value as '普通' | '当座' | '')}
+              onValueChange={value => setEditAccountType(value as '譎ｮ騾・ | '蠖灘ｺｧ' | '')}
             >
-              <SelectTrigger><SelectValue placeholder="口座種別" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="蜿｣蠎ｧ遞ｮ蛻･" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="普通">普通</SelectItem>
-                <SelectItem value="当座">当座</SelectItem>
+                <SelectItem value="譎ｮ騾・>譎ｮ騾・/SelectItem>
+                <SelectItem value="蠖灘ｺｧ">蠖灘ｺｧ</SelectItem>
               </SelectContent>
             </Select>
-            <Input value={editAccountNumber} onChange={e => setEditAccountNumber(e.target.value)} placeholder="口座番号" />
-            <Input value={editAccountName} onChange={e => setEditAccountName(e.target.value)} placeholder="口座名義" />
+            <Input value={editAccountNumber} onChange={e => setEditAccountNumber(e.target.value)} placeholder="蜿｣蠎ｧ逡ｪ蜿ｷ" />
+            <Input value={editAccountName} onChange={e => setEditAccountName(e.target.value)} placeholder="蜿｣蠎ｧ蜷咲ｾｩ" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              キャンセル
+              繧ｭ繝｣繝ｳ繧ｻ繝ｫ
             </Button>
-            <Button onClick={handleSave}>保存</Button>
+            <Button onClick={handleSave}>菫晏ｭ・/Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -1,3 +1,5 @@
+﻿"use client"
+
 'use client';
 import { useEffect } from 'react';
 
@@ -10,7 +12,7 @@ export default function NoZoomOnFocus({ hardReset = true }: { hardReset?: boolea
       meta.getAttribute('content') || 'width=device-width, initial-scale=1, viewport-fit=cover';
 
     const setLocked = () => {
-      // 既存の maximum-scale / user-scalable を一旦除去してから付け直し
+      // 譌｢蟄倥・ maximum-scale / user-scalable 繧剃ｸ譌ｦ髯､蜴ｻ縺励※縺九ｉ莉倥￠逶ｴ縺・
       const cleaned = original
         .replace(/,\s*maximum-scale=[^,]*/gi, '')
         .replace(/,\s*user-scalable=[^,]*/gi, '');
@@ -32,13 +34,13 @@ export default function NoZoomOnFocus({ hardReset = true }: { hardReset?: boolea
     document.addEventListener('focusin', onFocusIn);
     document.addEventListener('focusout', onFocusOut);
 
-    // ★ 初期ズームが持ち越される問題を確実にリセット
+    // 笘・蛻晄悄繧ｺ繝ｼ繝縺梧戟縺｡雜翫＆繧後ｋ蝠城｡後ｒ遒ｺ螳溘↓繝ｪ繧ｻ繝・ヨ
     if (hardReset) {
-      // 1) 万一フォーカス中なら解除
+      // 1) 荳・ｸ繝輔か繝ｼ繧ｫ繧ｹ荳ｭ縺ｪ繧芽ｧ｣髯､
       if (document.activeElement instanceof HTMLElement) {
         try { document.activeElement.blur(); } catch {}
       }
-      // 2) 一時的にロック → 少し待って元に戻す（iOS で初期倍率を 1 に戻すための“揺さぶり”）
+      // 2) 荳譎ら噪縺ｫ繝ｭ繝・け 竊・蟆代＠蠕・▲縺ｦ蜈・↓謌ｻ縺呻ｼ・OS 縺ｧ蛻晄悄蛟咲紫繧・1 縺ｫ謌ｻ縺吶◆繧√・窶懈昭縺輔・繧岩晢ｼ・
       setLocked();
       const id = setTimeout(() => {
         meta.setAttribute('content', original);

@@ -1,3 +1,5 @@
+﻿"use client"
+
 'use client';
 
 import React, {
@@ -13,10 +15,9 @@ import type { Session } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
 import { toast } from '@/components/ui/use-toast';
 
-// SupabaseのSessionからUser型を取得
-export type User = Session['user'];
+// Supabase縺ｮSession縺九ｉUser蝙九ｒ蜿門ｾ・export type User = Session['user'];
 
-// コンテキストが提供する型
+// 繧ｳ繝ｳ繝・く繧ｹ繝医′謠蝉ｾ帙☆繧句梛
 export interface AuthContextType {
   session: Session | null;
   user: User | null;
@@ -34,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 初期セッション取得 + 状態変化購読
+  // 蛻晄悄繧ｻ繝・す繝ｧ繝ｳ蜿門ｾ・+ 迥ｶ諷句､牙喧雉ｼ隱ｭ
   useEffect(() => {
     let mounted = true;
 
@@ -49,8 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      // Cookieの直接読取・JSON.parse 等は一切しない
-      setSession(newSession ?? null);
+      // Cookie縺ｮ逶ｴ謗･隱ｭ蜿悶・JSON.parse 遲峨・荳蛻・＠縺ｪ縺・      setSession(newSession ?? null);
     });
 
     return () => {
@@ -65,17 +65,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
         toast({
-          title: 'ログイン失敗',
+          title: '繝ｭ繧ｰ繧､繝ｳ螟ｱ謨・,
           description: error.message,
           variant: 'destructive',
         });
         return false;
       }
-      toast({ title: 'ログイン成功', description: 'ようこそ！' });
+      toast({ title: '繝ｭ繧ｰ繧､繝ｳ謌仙粥', description: '繧医≧縺薙◎・・ });
       return true;
     } catch (e: any) {
       toast({
-        title: 'ログイン失敗',
+        title: '繝ｭ繧ｰ繧､繝ｳ螟ｱ謨・,
         description: e?.message ?? String(e),
         variant: 'destructive',
       });
@@ -89,12 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signOut();
     if (error) {
       toast({
-        title: 'ログアウト失敗',
+        title: '繝ｭ繧ｰ繧｢繧ｦ繝亥､ｱ謨・,
         description: error.message,
         variant: 'destructive',
       });
     } else {
-      toast({ title: 'ログアウト完了', description: 'またお待ちしています！' });
+      toast({ title: '繝ｭ繧ｰ繧｢繧ｦ繝亥ｮ御ｺ・, description: '縺ｾ縺溘♀蠕・■縺励※縺・∪縺呻ｼ・ });
     }
   };
 
