@@ -1,6 +1,4 @@
-﻿// app/page.tsx など（トップページ）
-// ※ あなたのルーティングに合わせて配置してください
-'use client';
+﻿/'use client';
 
 import { useEffect, useState } from 'react';
 import Link from "next/link";
@@ -9,16 +7,16 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Camera, Gamepad, Smartphone, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-// import { Header } from "@/components/header"; // 必要なら利用
+// import { Header } from "@/components/header"; // ← 削除（レイアウトで出す）
 import { supabase } from "@/lib/supabase";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 /* ======================
-   お知らせセクション（最新3件を表示）
+   お知らせ表示（同構造・半分高さ・中立配色）
    ====================== */
 type NewsRow = {
   id: string;
-  title: string;
+  title: string | null;
   body: string | null;
   published_at: string; // ISO
   is_active: boolean;
@@ -43,11 +41,14 @@ function NewsSection() {
   }, []);
 
   return (
-    <section className="w-full py-6 md:py-8">
+    <section className="w-full py-6 md:py-8" aria-labelledby="news-heading">
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">お知らせ</h2>
+            {/* ▼ フレーズだけ差し替え（SEO見出しの階層は維持） */}
+            <h2 id="news-heading" className="text-3xl font-bold tracking-tighter md:text-4xl">
+              お知らせ
+            </h2>
             <p className="max-w-[900px] text-muted-foreground md:text-xl">
               最新情報をお届けします
             </p>
@@ -58,15 +59,15 @@ function NewsSection() {
           {loading ? (
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">読み込み中</CardTitle>
-                <CardDescription>しばらくお待ちください。</CardDescription>
+                <CardTitle className="text-sm">読み込み中…</CardTitle>
+                <CardDescription>少々お待ちください。</CardDescription>
               </CardHeader>
             </Card>
-          ) : news.length === 0 ? (
+          ) : (news?.length ?? 0) === 0 ? (
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm">現在お知らせはありません</CardTitle>
-                <CardDescription>近日公開のお知らせがここに表示されます。</CardDescription>
+                <CardDescription>公開中のお知らせが追加されると表示されます。</CardDescription>
               </CardHeader>
             </Card>
           ) : (
@@ -76,14 +77,14 @@ function NewsSection() {
                   {news.map((n) => (
                     <li key={n.id} className="leading-6">
                       <span className="font-medium">
-                        {new Date(n.published_at).toLocaleDateString("ja-JP")}
+                        {n.published_at ? new Date(n.published_at).toLocaleDateString("ja-JP") : ""}
                       </span>
-                      <span className="mx-2">・</span>
+                      <span className="mx-2">：</span>
                       <Link
                         href={`/news/${n.id}`}
                         className="font-medium hover:underline underline-offset-4"
                       >
-                        {n.title}
+                        {n.title ?? "(無題のお知らせ)"}
                       </Link>
                     </li>
                   ))}
@@ -118,36 +119,35 @@ export default function Home() {
     };
   }, []);
 
-  // 検索フォーム submit（/search に遷移）
+  // ★ 既存ロジック維持：非表示バリアントを除外するパラメータを追加
   const onSubmitSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const params = new URLSearchParams();
     if (keyword.trim()) params.set("q", keyword.trim());
     if (category) params.set("category", category);
-    // 検索結果は「表示中（is_hidden=false）」のみ
-    params.set("visibleOnly", "1");
-
+    params.set("visibleOnly", "1"); // 表示中のバリアントのみ
     const qs = params.toString();
     router.push(qs ? `/search?${qs}` : "/search");
   };
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* Header は layout 側で描画する想定 */}
+      {/* Header は layout 経由で描画 */}
 
       <main className="flex-1">
         {/* ====== HERO ====== */}
-        <section className="w-full py-6 md:py-12 lg:py-16 bg-muted">
+        <section className="w-full py-6 md:py-12 lg:py-16 bg-muted" aria-labelledby="hero-heading">
           <div className="mx-auto max-w-7xl px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-10 xl:gap-12 place-items-center">
               <div className="flex flex-col justify-center space-y-3 w-full">
                 <div className="space-y-2">
-                  <h1 className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none lg:whitespace-nowrap lg:leading-none">
-                    新品・未使用特化の高価買取サービス
+                  {/* ▼ フレーズ更新（ブランド軸） */}
+                  <h1 id="hero-heading" className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none lg:whitespace-nowrap lg:leading-none">
+                    新品・未使用ランク特化の高価買取サービス
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-lg">
-                    iPhone・カメラ・ゲームを中心に、全国対応・即日入金に対応。<br />
-                    かんたん申込で査定から振込までスムーズに。
+                    iPhone・カメラ・ゲームを中心に全国対応。査定成立後は<span className="font-semibold">最短即日入金</span>。<br />
+                    かんたん申込で、査定から振込までスムーズに。
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -159,7 +159,7 @@ export default function Home() {
                   </Link>
                   <Link href="/how-it-works">
                     <Button variant="outline" size="lg">
-                      しくみを見る
+                      買取の流れ
                     </Button>
                   </Link>
                 </div>
@@ -171,7 +171,7 @@ export default function Home() {
                     src="/images/logo-symbol.png"
                     width={320}
                     height={320}
-                    alt="ロゴ"
+                    alt="買取ハント ロゴ"
                     priority
                     className="rounded-lg object-contain w-full aspect-square"
                   />
@@ -196,7 +196,7 @@ export default function Home() {
                   <input
                     type="search"
                     inputMode="search"
-                    aria-label="検索ボックス"
+                    aria-label="キーワード検索"
                     placeholder="JAN または 商品名で検索"
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
@@ -226,7 +226,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="mt-2 text-xs text-muted-foreground">
-                例：iPhone 17 Pro 256GB、EOS R7、Nintendo Switch、有効な JAN（8桁/13桁）
+                例: 「iPhone 17 Pro 256GB」「Switch 有機EL」
               </div>
             </form>
           </div>
@@ -235,14 +235,16 @@ export default function Home() {
         {/* ====== お知らせ ====== */}
         <NewsSection />
 
-        {/* ====== 取扱カテゴリ ====== */}
-        <section className="w-full py-12 md:py-20 lg:py-24">
+        {/* ====== 買取カテゴリー ====== */}
+        <section className="w-full py-12 md:py-20 lg:py-24" aria-labelledby="category-heading">
           <div className="mx-auto max-w-7xl px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">取扱カテゴリ</h2>
+                <h2 id="category-heading" className="text-3xl font-bold tracking-tighter md:text-4xl">
+                  買取カテゴリー
+                </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
-                  人気のカテゴリを厳選。査定スピードと入金までの速さに自信があります。
+                  専門スタッフが丁寧に査定し、市場価値に基づいた適正価格で買取します。
                 </p>
               </div>
             </div>
@@ -255,7 +257,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold">iPhone</h3>
                   <p className="text-muted-foreground text-center">
-                    最新から型落ちまで幅広く。新品・未使用ランクに特化した高価買取。
+                    最新から定番モデルまで、<span className="font-semibold">新品・未使用ランク</span>を高価買取。
                   </p>
                   <Button variant="outline" className="mt-2 group-hover:bg-primary group-hover:text-primary-foreground">
                     詳細を見る
@@ -270,7 +272,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold">カメラ</h3>
                   <p className="text-muted-foreground text-center">
-                    一眼・ミラーレス・レンズなど。コンディションに応じてしっかり査定。
+                    一眼・ミラーレス・コンデジまで、<span className="font-semibold">新品・未使用ランク</span>に特化。
                   </p>
                   <Button variant="outline" className="mt-2 group-hover:bg-primary group-hover:text-primary-foreground">
                     詳細を見る
@@ -285,7 +287,7 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold">ゲーム</h3>
                   <p className="text-muted-foreground text-center">
-                    本体・コントローラー・限定版など。未使用品は特に高額査定のチャンス。
+                    本体・ソフト・周辺機器の<span className="font-semibold">新品・未使用ランク</span>を高価買取。
                   </p>
                   <Button variant="outline" className="mt-2 group-hover:bg-primary group-hover:text-primary-foreground">
                     詳細を見る
@@ -296,46 +298,40 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ====== しくみ ====== */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+        {/* ====== 買取の流れ ====== */}
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted" aria-labelledby="flow-heading">
           <div className="mx-auto max-w-7xl px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">ご利用の流れ</h2>
+                <h2 id="flow-heading" className="text-3xl font-bold tracking-tighter md:text-4xl">買取の流れ</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
-                  かんたん3ステップで、査定から入金までスピーディーに対応します。
+                  かんたん3ステップ。査定成立後は<span className="font-semibold">最短即日入金</span>。
                 </p>
               </div>
             </div>
 
             <div className="mx-auto mt-8 grid grid-cols-1 gap-6 md:grid-cols-3 max-w-6xl">
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-background p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  1
-                </div>
-                <h3 className="text-xl font-bold">会員登録／ログイン</h3>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">1</div>
+                <h3 className="text-xl font-bold">会員登録・ログイン</h3>
                 <p className="text-muted-foreground text-center">
-                  まずは会員登録またはログイン。申込に必要な情報をマイページで登録できます。
+                  会員になると買取履歴の確認や各種手続きがスムーズに。
                 </p>
               </div>
 
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-background p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  2
-                </div>
-                <h3 className="text-xl font-bold">査定に申し込み</h3>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">2</div>
+                <h3 className="text-xl font-bold">買取申込</h3>
                 <p className="text-muted-foreground text-center">
-                  商品を選択してお申し込み。状態などを入力いただくと概算見積もりが出ます。
+                  商品をカートに入れて申込。発送方法や店舗持込も選べます。
                 </p>
               </div>
 
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-background p-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  3
-                </div>
-                <h3 className="text-xl font-bold">発送・検品・ご入金</h3>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">3</div>
+                <h3 className="text-xl font-bold">郵送・査定・成立</h3>
                 <p className="text-muted-foreground text-center">
-                  着荷後に検品し、最終金額をご案内。ご承認後、即日のお振り込みに対応します。
+                  専門スタッフが査定。金額にご納得いただければ、成立後<span className="font-semibold">最短即日入金</span>。
                 </p>
               </div>
             </div>
@@ -366,11 +362,11 @@ export default function Home() {
                            gap-x-5 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 gap-y-3
                            text-xs sm:text-[13px] md:text-sm"
               >
-                <li><Link className="hover:underline underline-offset-4 whitespace-nowrap" href="/about">会社情報</Link></li>
+                <li><Link className="hover:underline underline-offset-4 whitespace-nowrap" href="/about">会社概要</Link></li>
                 <li><Link className="hover:underline underline-offset-4 whitespace-nowrap" href="/terms">利用規約</Link></li>
                 <li><Link className="hover:underline underline-offset-4 whitespace-nowrap" href="/privacy">プライバシーポリシー</Link></li>
                 <li><Link className="hover:underline underline-offset-4 whitespace-nowrap" href="/faq">よくある質問</Link></li>
-                <li><Link className="hover:underline underline-offset-4 whitespace-nowrap" href="/legal">特商法 / 古物営業法に基づく表記</Link></li>
+                <li><Link className="hover:underline underline-offset-4 whitespace-nowrap" href="/legal">特定商取引法及び古物営業法に基づく表記</Link></li>
               </ul>
             </nav>
           </div>
