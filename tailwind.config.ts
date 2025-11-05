@@ -1,3 +1,4 @@
+// tailwind.config.ts
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -8,6 +9,17 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      /* ★ ここを追加 */
+      fontFamily: {
+        // next/font の CSS 変数を Tailwind の font-sans に紐づけ
+        sans: [
+          "var(--font-noto-sans-jp)",
+          "var(--font-inter)",
+          "system-ui",
+          "sans-serif",
+        ],
+      },
+
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

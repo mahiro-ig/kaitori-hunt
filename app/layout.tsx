@@ -1,12 +1,22 @@
 // app/layout.tsx  ← "use client" は付けない（サーバーコンポーネント）
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
 import ClientRoot from "./_components/client-root"; // ← クライアント側に集約
 
-const inter = Inter({ subsets: ["latin"] });
+// ★ 重要：日本語を Noto Sans JP、英数を Inter に
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+const notoSansJP = Noto_Sans_JP({
+  weight: ["400", "500", "700"],
+  variable: "--font-noto-sans-jp",
+  display: "swap",
+});
 
 // ✅ 環境ごとに自動切り替え（サーバー評価OK）
 const isProd = process.env.NODE_ENV === "production";
@@ -75,11 +85,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ja" className="h-full" suppressHydrationWarning>
+    <html
+      lang="ja"
+      className={`h-full ${inter.variable} ${notoSansJP.variable}`}
+      suppressHydrationWarning
+    >
       <head />
-      <body
-        className={`min-h-[100svh] overflow-x-hidden bg-background text-foreground antialiased ${inter.className}`}
-      >
+      {/* ← Tailwind の font-sans を var(--font-noto-sans-jp), var(--font-inter) に結びつけるので、
+          body に font-sans を当てる */}
+      <body className="min-h-[100svh] overflow-x-hidden bg-background text-foreground antialiased font-sans">
         {/* ↓ クライアント要素は 1 枚下の Client コンポーネントに集約 */}
         <ClientRoot>{children}</ClientRoot>
       </body>
