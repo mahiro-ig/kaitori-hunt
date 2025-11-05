@@ -1,5 +1,4 @@
 "use client"
-// app/terms/page.tsx
 
 import React from "react"
 import Link from "next/link"

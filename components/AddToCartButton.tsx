@@ -1,4 +1,3 @@
-// app/components/AddToCartButton.tsx
 "use client";
 
 import * as React from "react";
