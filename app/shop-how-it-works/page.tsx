@@ -42,7 +42,7 @@ export default function ShopHowItWorksPage() {
                 <div className="md:col-span-2 min-w-0">
                   <CardDescription className="text-base mb-4 break-words">
                     まずは会員登録をして、買取ハントのアカウントを作成しましょう。
-                    登録は無料で、数分で完了します。すでにアカウントをお持ちの方はログインしてください。
+                    登録は無料で、簡単に完了します。すでにアカウントをお持ちの方はログインしてください。
                   </CardDescription>
                   <ul className="space-y-2">
                     <li className="flex items-start">
@@ -112,7 +112,7 @@ export default function ShopHowItWorksPage() {
                     </li>
                   </ul>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Link href="/categories">
+                    <Link href="/">
                       <Button variant="outline" size="sm">
                         買取カテゴリーを見る
                         <ArrowRight className="ml-2 h-4 w-4" />
