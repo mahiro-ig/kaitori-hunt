@@ -6,19 +6,26 @@ import "./globals.css";
 
 import ClientRoot from "./_components/client-root"; // ← クライアント側に集約
 
-// ★ 重要：日本語を Noto Sans JP、英数を Inter に
+// ======================
+// フォント設定
+// ======================
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
 });
+
 const notoSansJP = Noto_Sans_JP({
+  preload: false, // ✅ CJK は巨大なのでプリロード無効（ビルドエラー回避）
+  subsets: ["latin"], // ✅ 必須（latinを指定してエラー回避）
   weight: ["400", "500", "700"],
   variable: "--font-noto-sans-jp",
   display: "swap",
 });
 
-// ✅ 環境ごとに自動切り替え（サーバー評価OK）
+// ======================
+// サイトURLなどの共通設定
+// ======================
 const isProd = process.env.NODE_ENV === "production";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -31,7 +38,9 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// ✅ metadataBase を環境に応じて動的に設定（サーバーOK）
+// ======================
+// メタデータ
+// ======================
 const defaultTitle =
   "買取ハント｜新品・未使用ランク特化の高価買取サービス｜即日入金・全国対応";
 const defaultDescription =
@@ -83,6 +92,9 @@ export const metadata: Metadata = {
   generator: "nextjs",
 };
 
+// ======================
+// レイアウト本体
+// ======================
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
@@ -91,8 +103,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <head />
-      {/* ← Tailwind の font-sans を var(--font-noto-sans-jp), var(--font-inter) に結びつけるので、
-          body に font-sans を当てる */}
       <body className="min-h-[100svh] overflow-x-hidden bg-background text-foreground antialiased font-sans">
         {/* ↓ クライアント要素は 1 枚下の Client コンポーネントに集約 */}
         <ClientRoot>{children}</ClientRoot>
