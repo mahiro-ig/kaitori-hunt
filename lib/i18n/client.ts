@@ -1,7 +1,11 @@
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
+"use client";
 
-// サポートする言語のリスト
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+
+/* =========================
+   言語・辞書（クライアント用）
+   ========================= */
 export const supportedLanguages = [
   { code: "ja", name: "日本語", flag: "🇯🇵" },
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -9,17 +13,12 @@ export const supportedLanguages = [
   { code: "vi", name: "Tiếng Việt", flag: "🇻🇳" },
   { code: "th", name: "ไทย", flag: "🇹🇭" },
   { code: "ko", name: "한국어", flag: "🇰🇷" },
-]
+] as const;
 
-// 言語コードの型
-export type LanguageCode = "ja" | "en" | "zh" | "vi" | "th" | "ko"
+export type LanguageCode = "ja" | "en" | "zh" | "vi" | "th" | "ko";
 
-// 翻訳リソースの型
-export type TranslationResource = {
-  [key: string]: string
-}
+export type TranslationResource = Record<string, string>;
 
-// 言語ごとの翻訳リソース
 export const translations: Record<LanguageCode, TranslationResource> = {
   ja: {
     // ナビゲーション
@@ -34,8 +33,7 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "nav.dashboard": "マイページ",
     "nav.admin": "管理画面",
     "nav.cart": "カート",
-
-    // ホームページ
+    // ホーム
     "home.hero.title": "iPhone・カメラ・ゲーム機の買取なら",
     "home.hero.subtitle": "高価買取、スピード対応、安心の本人確認システム",
     "home.hero.cta": "今すぐ査定",
@@ -46,8 +44,7 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "home.features.fast_desc": "申し込みから入金まで最短2日で完了します。",
     "home.features.secure": "安心の本人確認",
     "home.features.secure_desc": "オンラインで完結する本人確認システムで安全に取引できます。",
-
-    // 設定画面
+    // 設定
     "settings.general": "一般設定",
     "settings.notifications": "通知設定",
     "settings.prices": "買取価格設定",
@@ -58,7 +55,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "settings.language.description": "サイト全体の表示言語を設定します",
     "settings.language.select": "言語を選択",
     "settings.language.auto": "ブラウザの言語を使用",
-
     // 共通
     "common.save": "保存",
     "common.cancel": "キャンセル",
@@ -71,7 +67,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "common.success": "成功しました",
   },
   en: {
-    // Navigation
     "nav.home": "Home",
     "nav.iphone": "iPhone",
     "nav.camera": "Camera",
@@ -83,8 +78,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "nav.dashboard": "Dashboard",
     "nav.admin": "Admin",
     "nav.cart": "Cart",
-
-    // Homepage
     "home.hero.title": "Best Buyback for iPhone, Camera, and Game Consoles",
     "home.hero.subtitle": "High price, Fast process, Secure verification system",
     "home.hero.cta": "Get Quote Now",
@@ -95,8 +88,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "home.features.fast_desc": "Complete the entire process in as little as 2 days.",
     "home.features.secure": "Secure Verification",
     "home.features.secure_desc": "Our online verification system ensures safe transactions.",
-
-    // Settings
     "settings.general": "General Settings",
     "settings.notifications": "Notification Settings",
     "settings.prices": "Price Settings",
@@ -107,8 +98,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "settings.language.description": "Set the display language for the entire site",
     "settings.language.select": "Select Language",
     "settings.language.auto": "Use Browser Language",
-
-    // Common
     "common.save": "Save",
     "common.cancel": "Cancel",
     "common.edit": "Edit",
@@ -120,7 +109,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "common.success": "Success",
   },
   zh: {
-    // 导航
     "nav.home": "首页",
     "nav.iphone": "iPhone",
     "nav.camera": "相机",
@@ -132,8 +120,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "nav.dashboard": "我的账户",
     "nav.admin": "管理页面",
     "nav.cart": "购物车",
-
-    // 首页
     "home.hero.title": "iPhone、相机、游戏机的回收服务",
     "home.hero.subtitle": "高价回收、快速处理、安全的身份验证系统",
     "home.hero.cta": "立即评估",
@@ -144,8 +130,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "home.features.fast_desc": "从申请到付款，最快2天内完成。",
     "home.features.secure": "安全验证",
     "home.features.secure_desc": "我们的在线身份验证系统确保交易安全。",
-
-    // 设置
     "settings.general": "一般设置",
     "settings.notifications": "通知设置",
     "settings.prices": "价格设置",
@@ -156,8 +140,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "settings.language.description": "设置整个网站的显示语言",
     "settings.language.select": "选择语言",
     "settings.language.auto": "使用浏览器语言",
-
-    // 通用
     "common.save": "保存",
     "common.cancel": "取消",
     "common.edit": "编辑",
@@ -169,7 +151,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "common.success": "成功",
   },
   vi: {
-    // Điều hướng
     "nav.home": "Trang chủ",
     "nav.iphone": "iPhone",
     "nav.camera": "Máy ảnh",
@@ -181,20 +162,18 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "nav.dashboard": "Trang cá nhân",
     "nav.admin": "Quản trị",
     "nav.cart": "Giỏ hàng",
-
-    // Trang chủ
     "home.hero.title": "Thu mua iPhone, Máy ảnh và Máy chơi game",
     "home.hero.subtitle": "Giá cao, Xử lý nhanh, Hệ thống xác minh an toàn",
     "home.hero.cta": "Báo giá ngay",
     "home.features.title": "Tính năng của chúng tôi",
     "home.features.high_price": "Giá tốt nhất",
-    "home.features.high_price_desc": "Chúng tôi liên tục phân tích giá thị trường để đưa ra giá trị tốt nhất.",
+    "home.features.high_price_desc":
+      "Chúng tôi liên tục phân tích giá thị trường để đưa ra giá trị tốt nhất.",
     "home.features.fast": "Xử lý nhanh",
     "home.features.fast_desc": "Hoàn thành toàn bộ quy trình chỉ trong 2 ngày.",
     "home.features.secure": "Xác minh an toàn",
-    "home.features.secure_desc": "Hệ thống xác minh trực tuyến đảm bảo giao dịch an toàn.",
-
-    // Cài đặt
+    "home.features.secure_desc":
+      "Hệ thống xác minh trực tuyến đảm bảo giao dịch an toàn.",
     "settings.general": "Cài đặt chung",
     "settings.notifications": "Cài đặt thông báo",
     "settings.prices": "Cài đặt giá",
@@ -202,11 +181,10 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "settings.language": "Cài đặt ngôn ngữ",
     "settings.save": "Lưu cài đặt",
     "settings.language.title": "Cài đặt ngôn ngữ",
-    "settings.language.description": "Đặt ngôn ngữ hiển thị cho toàn bộ trang web",
+    "settings.language.description":
+      "Đặt ngôn ngữ hiển thị cho toàn bộ trang web",
     "settings.language.select": "Chọn ngôn ngữ",
     "settings.language.auto": "Sử dụng ngôn ngữ trình duyệt",
-
-    // Chung
     "common.save": "Lưu",
     "common.cancel": "Hủy",
     "common.edit": "Chỉnh sửa",
@@ -218,7 +196,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "common.success": "Thành công",
   },
   th: {
-    // การนำทาง
     "nav.home": "หน้าแรก",
     "nav.iphone": "iPhone",
     "nav.camera": "กล้อง",
@@ -230,20 +207,19 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "nav.dashboard": "แดชบอร์ด",
     "nav.admin": "ผู้ดูแลระบบ",
     "nav.cart": "ตะกร้า",
-
-    // หน้าแรก
     "home.hero.title": "รับซื้อ iPhone กล้อง และเครื่องเล่นเกม",
-    "home.hero.subtitle": "ราคาสูง กระบวนการรวดเร็ว ระบบยืนยันตัวตนที่ปลอดภัย",
+    "home.hero.subtitle":
+      "ราคาสูง กระบวนการรวดเร็ว ระบบยืนยันตัวตนที่ปลอดภัย",
     "home.hero.cta": "ประเมินราคาเลย",
     "home.features.title": "คุณสมบัติของเรา",
     "home.features.high_price": "ราคาดีที่สุด",
-    "home.features.high_price_desc": "เราวิเคราะห์ราคาตลาดอย่างต่อเนื่องเพื่อเสนอมูลค่าที่ดีที่สุด",
+    "home.features.high_price_desc":
+      "เราวิเคราะห์ราคาตลาดอย่างต่อเนื่องเพื่อเสนอมูลค่าที่ดีที่สุด",
     "home.features.fast": "กระบวนการรวดเร็ว",
     "home.features.fast_desc": "เสร็จสิ้นกระบวนการทั้งหมดภายในเพียง 2 วัน",
     "home.features.secure": "การยืนยันที่ปลอดภัย",
-    "home.features.secure_desc": "ระบบยืนยันตัวตนออนไลน์ของเราช่วยให้การทำธุรกรรมปลอดภัย",
-
-    // การตั้งค่า
+    "home.features.secure_desc":
+      "ระบบยืนยันตัวตนออนไลน์ของเราช่วยให้การทำธุรกรรมปลอดภัย",
     "settings.general": "การตั้งค่าทั่วไป",
     "settings.notifications": "การตั้งค่าการแจ้งเตือน",
     "settings.prices": "การตั้งค่าราคา",
@@ -251,11 +227,10 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "settings.language": "การตั้งค่าภาษา",
     "settings.save": "บันทึกการตั้งค่า",
     "settings.language.title": "การตั้งค่าภาษา",
-    "settings.language.description": "ตั้งค่าภาษาที่แสดงสำหรับเว็บไซต์ทั้งหมด",
+    "settings.language.description":
+      "ตั้งค่าภาษาที่แสดงสำหรับเว็บไซต์ทั้งหมด",
     "settings.language.select": "เลือกภาษา",
     "settings.language.auto": "ใช้ภาษาของเบราว์เซอร์",
-
-    // ทั่วไป
     "common.save": "บันทึก",
     "common.cancel": "ยกเลิก",
     "common.edit": "แก้ไข",
@@ -267,7 +242,6 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "common.success": "สำเร็จ",
   },
   ko: {
-    // 네비게이션
     "nav.home": "홈",
     "nav.iphone": "아이폰",
     "nav.camera": "카메라",
@@ -279,20 +253,19 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "nav.dashboard": "대시보드",
     "nav.admin": "관리자",
     "nav.cart": "장바구니",
-
-    // 홈페이지
     "home.hero.title": "아이폰, 카메라, 게임기 매입 서비스",
     "home.hero.subtitle": "높은 가격, 빠른 처리, 안전한 인증 시스템",
     "home.hero.cta": "지금 견적 받기",
     "home.features.title": "우리의 특징",
     "home.features.high_price": "최고 가격",
-    "home.features.high_price_desc": "시장 가격을 지속적으로 분석하여 최상의 가치를 제공합니다.",
+    "home.features.high_price_desc":
+      "시장 가격을 지속적으로 분석하여 최상의 가치를 제공합니다.",
     "home.features.fast": "빠른 처리",
-    "home.features.fast_desc": "신청부터 입금까지 최소 2일 내에 완료됩니다.",
+    "home.features.fast_desc":
+      "신청부터 입금까지 최소 2일 내에 완료됩니다.",
     "home.features.secure": "안전한 인증",
-    "home.features.secure_desc": "온라인 인증 시스템으로 안전한 거래를 보장합니다.",
-
-    // 설정
+    "home.features.secure_desc":
+      "온라인 인증 시스템으로 안전한 거래를 보장합니다.",
     "settings.general": "일반 설정",
     "settings.notifications": "알림 설정",
     "settings.prices": "가격 설정",
@@ -300,11 +273,10 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "settings.language": "언어 설정",
     "settings.save": "설정 저장",
     "settings.language.title": "언어 설정",
-    "settings.language.description": "사이트 전체의 표시 언어를 설정합니다",
+    "settings.language.description":
+      "사이트 전체의 표시 언어를 설정합니다",
     "settings.language.select": "언어 선택",
     "settings.language.auto": "브라우저 언어 사용",
-
-    // 공통
     "common.save": "저장",
     "common.cancel": "취소",
     "common.edit": "편집",
@@ -315,13 +287,15 @@ export const translations: Record<LanguageCode, TranslationResource> = {
     "common.error": "오류가 발생했습니다",
     "common.success": "성공",
   },
-}
+};
 
-// 言語設定を管理するZustandストア
+/* =========================
+   Zustand ストア（クライアント専用）
+   ========================= */
 export interface LanguageState {
-  language: LanguageCode
-  setLanguage: (language: LanguageCode) => void
-  t: (key: string, fallback?: string) => string
+  language: LanguageCode;
+  setLanguage: (language: LanguageCode) => void;
+  t: (key: string, fallback?: string) => string;
 }
 
 export const useLanguage = create<LanguageState>()(
@@ -330,27 +304,28 @@ export const useLanguage = create<LanguageState>()(
       language: "ja",
       setLanguage: (language: LanguageCode) => set({ language }),
       t: (key: string, fallback?: string) => {
-        const { language } = get()
-        const translation = translations[language]
-        return translation[key] || fallback || key
+        const { language } = get();
+        const dict = translations[language];
+        return dict[key] ?? fallback ?? key;
       },
     }),
     {
       name: "language-storage",
-    },
-  ),
-)
+      // 重要：SSRで storage を触らないように明示
+      storage:
+        typeof window !== "undefined"
+          ? createJSONStorage(() => localStorage)
+          : undefined,
+    }
+  )
+);
 
-// ブラウザの言語設定から最適な言語を検出する関数
+/* =========================
+   ブラウザ言語の検出（クライアントのみ）
+   ========================= */
 export function detectBrowserLanguage(): LanguageCode {
-  if (typeof window === "undefined") return "ja"
-
-  const browserLang = navigator.language.split("-")[0]
-  const supportedCodes = supportedLanguages.map((lang) => lang.code) as LanguageCode[]
-
-  if (supportedCodes.includes(browserLang as LanguageCode)) {
-    return browserLang as LanguageCode
-  }
-
-  return "ja" // デフォルト言語
+  if (typeof window === "undefined") return "ja";
+  const browserLang = (navigator.language || "").split("-")[0] as LanguageCode;
+  const codes = supportedLanguages.map((l) => l.code) as LanguageCode[];
+  return codes.includes(browserLang) ? browserLang : "ja";
 }

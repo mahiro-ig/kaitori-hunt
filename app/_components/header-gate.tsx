@@ -1,25 +1,19 @@
+// app/_components/client-root.tsx
 "use client";
 
-import { usePathname } from "next/navigation";
-import type { PropsWithChildren } from "react";
-import { Header } from "../../components/header";
+import type { ReactNode } from "react";
+import dynamic from "next/dynamic";
+import { Providers } from "@/components/providers";
 
-export function HeaderAndPad({ children }: PropsWithChildren) {
-  const pathname = usePathname();
-  const isAdmin = pathname?.startsWith("/admin");
-  if (isAdmin) return <>{children}</>;
+const HeaderAndPad = dynamic(
+  () => import("@/app/_components/header-gate").then((m) => m.HeaderAndPad),
+  { ssr: false }
+);
 
+export default function ClientRoot({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-[100svh] overflow-x-hidden bg-background">
-      {/* 非固定ヘッダー（通常フロー） */}
-      <Header />
-
-      {/* 余白は不要。safe-area の下余白だけ残すなら pb のみ */}
-      <main className="pb-[env(safe-area-inset-bottom)]">
-        {children}
-      </main>
-    </div>
+    <Providers>
+      <HeaderAndPad>{children}</HeaderAndPad>
+    </Providers>
   );
 }
-
-export default HeaderAndPad;
