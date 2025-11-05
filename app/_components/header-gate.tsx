@@ -1,18 +1,21 @@
 "use client";
 
-import type { ReactNode } from "react";
-import dynamic from "next/dynamic";
-import { Providers } from "@/components/providers";
+import { usePathname } from "next/navigation";
+import type { PropsWithChildren } from "react";
+import { Header } from "@/components/header";
 
-const HeaderAndPad = dynamic(
-  () => import("@/app/_components/header-gate").then((m) => m.HeaderAndPad),
-  { ssr: false }
-);
+export function HeaderAndPad({ children }: PropsWithChildren) {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin");
+  if (isAdmin) return <>{children}</>;
 
-export default function ClientRoot({ children }: { children: ReactNode }) {
   return (
-    <Providers>
-      <HeaderAndPad>{children}</HeaderAndPad>
-    </Providers>
+    <div className="min-h-[100svh] overflow-x-hidden bg-background">
+      <Header />
+      <main className="pb-[env(safe-area-inset-bottom)]">{children}</main>
+    </div>
   );
 }
+
+// ✅ default export を必ず用意
+export default HeaderAndPad;
