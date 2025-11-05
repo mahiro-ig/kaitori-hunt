@@ -1,6 +1,4 @@
-﻿"use client"
-
-// app/admin/login/page.tsx
+﻿// app/admin/login/page.tsx
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -17,23 +15,24 @@ export default function AdminLoginPage() {
   const [sending, setSending] = useState(false);
   const [errMsg, setErrMsg] = useState<string | null>(null);
 
+  // リダイレクト先（/admin/login 自身は禁止）
   const next = useMemo(() => {
     const n = sp.get('next');
     if (!n || n.startsWith('/admin/login')) return '/admin';
     return n;
   }, [sp]);
 
-  // 繧ｯ繧ｨ繝ｪ縺ｮ繧ｨ繝ｩ繝ｼ陦ｨ遉ｺ
+  // クエリのエラー表示
   useEffect(() => {
     const ed = sp.get('error_description');
     const e = sp.get('error');
     if (ed) setErrMsg(decodeURIComponent(ed));
-    else if (e === 'not_admin') setErrMsg('邂｡逅・・ｨｩ髯舌′蠢・ｦ√〒縺吶・);
-    else if (e === 'unauthorized') setErrMsg('繝ｭ繧ｰ繧､繝ｳ縺悟ｿ・ｦ√〒縺吶・);
+    else if (e === 'not_admin') setErrMsg('管理者権限がありません。');
+    else if (e === 'unauthorized') setErrMsg('ログインが必要です。');
     else setErrMsg(null);
   }, [sp]);
 
-  // 隱崎ｨｼ貂医∩縺九▽ admin 縺ｮ蝣ｴ蜷医・縺ｿ閾ｪ蜍暮・遘ｻ
+  // 既ログイン時は admin 権限ならダッシュボードへ
   useEffect(() => {
     if (status !== 'authenticated') return;
     const role = (data?.user as any)?.role;
@@ -54,18 +53,18 @@ export default function AdminLoginPage() {
       const res = await signIn('credentials', {
         email: emailLc,
         password,
-        redirect: false,
+        redirect: false, // 成否をここで判定して手動で遷移
       });
 
       if (!res || res.error || res.ok === false) {
-        setErrMsg('繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ縺ｾ縺溘・繝代せ繝ｯ繝ｼ繝峨′豁｣縺励￥縺ゅｊ縺ｾ縺帙ｓ縲・);
+        setErrMsg('メールまたはパスワードが正しくありません。');
         return;
       }
 
-      // 縺薙％縺ｧ縺ｯ role 蛻､螳壹○縺壹［iddleware 蛛ｴ縺ｧ譛邨ら｢ｺ隱・
+      // 権限チェックは middleware / サーバ側でも担保される想定
       router.replace(next);
     } catch (err: any) {
-      setErrMsg(err?.message ?? '繝ｭ繧ｰ繧､繝ｳ縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・);
+      setErrMsg(err?.message ?? 'ログインに失敗しました。');
     } finally {
       setSending(false);
     }
@@ -73,13 +72,17 @@ export default function AdminLoginPage() {
 
   return (
     <main className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-semibold mb-3">邂｡逅・Ο繧ｰ繧､繝ｳ</h1>
+      <h1 className="text-2xl font-semibold mb-3">管理者ログイン</h1>
 
-      {errMsg && <div className="mb-4 text-sm text-red-600">{errMsg}</div>}
+      {errMsg && (
+        <div className="mb-4 text-sm text-red-600" role="alert">
+          {errMsg}
+        </div>
+      )}
 
       <section className="space-y-6">
         <form onSubmit={handleSubmit} className="border rounded-lg p-4">
-          <h2 className="font-medium mb-2">繝代せ繝ｯ繝ｼ繝峨〒繝ｭ繧ｰ繧､繝ｳ</h2>
+          <h2 className="font-medium mb-2">メールとパスワードでログイン</h2>
           <div className="space-y-3">
             <input
               type="email"
@@ -93,7 +96,7 @@ export default function AdminLoginPage() {
             <input
               id="admin-password"
               type="password"
-              placeholder="繝代せ繝ｯ繝ｼ繝・
+              placeholder="パスワード"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="border rounded px-3 py-2 w-full"
@@ -105,7 +108,7 @@ export default function AdminLoginPage() {
               disabled={sending || !email || !password}
               className="px-4 py-2 rounded bg-gray-800 text-white disabled:opacity-50 w-full"
             >
-              {sending ? '繝ｭ繧ｰ繧､繝ｳ荳ｭ窶ｦ' : '繝ｭ繧ｰ繧､繝ｳ'}
+              {sending ? 'ログイン中…' : 'ログイン'}
             </button>
           </div>
         </form>

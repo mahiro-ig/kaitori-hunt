@@ -1,27 +1,26 @@
-﻿"use client"
+﻿// app/categories/iphone/page.tsx
+"use client";
 
-'use client';
+import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import type { Database } from "@/lib/database.types";
 
-import { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react'; // CartIcon 蜑企勁
-import { toast } from '../../../components/ui/use-toast';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import type { Database } from '../../../lib/database.types';
+import { useCart } from "@/contexts/cart-context";
+import { useSession } from "next-auth/react";
 
-import { useCart } from '../../../contexts/cart-context';
-import { useSession } from 'next-auth/react';
-
-import { Button } from '../../../components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
   CardContent,
   CardFooter,
   CardTitle,
-} from '../../../components/ui/card';
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -29,34 +28,36 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from '../../../components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from '../../../components/ui/select';
-import { Skeleton } from '../../../components/ui/skeleton';
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
-type Product = Database['public']['Tables']['products']['Row'];
-type Variant = Database['public']['Tables']['product_variants']['Row'];
+type Product = Database["public"]["Tables"]["products"]["Row"];
+type Variant = Database["public"]["Tables"]["product_variants"]["Row"];
 
+// 文字正規化 (trim + NFKC)
 const normalize = (v: unknown) => {
-  const s = String(v ?? '').trim();
+  const s = String(v ?? "").trim();
   // @ts-ignore
-  return typeof s.normalize === 'function' ? s.normalize('NFKC') : s;
+  return typeof s.normalize === "function" ? s.normalize("NFKC") : s;
 };
+// 表示用（空なら "N/A"）
 const toDisplay = (v: unknown) => {
   const s = normalize(v);
-  return s ? s : 'N/A';
+  return s ? s : "N/A";
 };
-const isNA = (s: string) => normalize(s) === 'N/A';
+const isNA = (s: string) => normalize(s) === "N/A";
 
 export default function IPhoneCategoryPage() {
   const supabase = useMemo(() => createClientComponentClient<Database>(), []);
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const { addToCart } = useCart();
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -66,20 +67,21 @@ export default function IPhoneCategoryPage() {
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedVariants, setSelectedVariants] = useState<Variant[]>([]);
-  const [selectedColor, setSelectedColor] = useState('');
-  const [selectedCapacity, setSelectedCapacity] = useState('');
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedCapacity, setSelectedCapacity] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const [isMobile, setIsMobile] = useState<boolean>(
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
   );
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // データ取得
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -88,10 +90,10 @@ export default function IPhoneCategoryPage() {
         setError(null);
 
         const { data: prods, error: prodErr } = await supabase
-          .from('products')
-          .select('*')
-          .eq('category', 'iphone')
-          .order('created_at', { ascending: false });
+          .from("products")
+          .select("*")
+          .eq("category", "iphone")
+          .order("created_at", { ascending: false });
         if (prodErr) throw prodErr;
         if (!mounted) return;
 
@@ -100,21 +102,24 @@ export default function IPhoneCategoryPage() {
         const ids = prods?.map((p) => p.id) ?? [];
         if (ids.length) {
           const { data: vars, error: varErr } = await supabase
-            .from('product_variants')
-            .select('*')
-            .in('product_id', ids)
-            .eq('is_hidden', false); // 笘・陦ｨ遉ｺ荳ｭ縺ｮ繝舌Μ繧｢繝ｳ繝医・縺ｿ蜿門ｾ・          if (varErr) throw varErr;
+            .from("product_variants")
+            .select("*")
+            .in("product_id", ids)
+            .eq("is_hidden", false);
+          if (varErr) throw varErr;
           if (!mounted) return;
+
           setAllVariants(vars ?? []);
 
-          // 笘・蜿ｯ隕悶ヰ繝ｪ繧｢繝ｳ繝医′1莉ｶ繧ゅ↑縺・膚蜩√・荳隕ｧ縺九ｉ髯､螟・          const visibleIds = new Set((vars ?? []).map((v) => v.product_id));
+          // 表示可能なバリアントがある商品のみ残す
+          const visibleIds = new Set((vars ?? []).map((v) => v.product_id));
           setProducts((prev) => prev.filter((p) => visibleIds.has(p.id)));
         } else {
           setAllVariants([]);
         }
       } catch {
         if (!mounted) return;
-        setError('繝・・繧ｿ縺ｮ蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆');
+        setError("データの取得に失敗しました。");
       } finally {
         if (mounted) setLoading(false);
       }
@@ -133,8 +138,8 @@ export default function IPhoneCategoryPage() {
     setSelectedProduct(product);
     const vs = allVariants.filter((v) => v.product_id === product.id);
     setSelectedVariants(vs);
-    setSelectedColor('');
-    setSelectedCapacity('');
+    setSelectedColor("");
+    setSelectedCapacity("");
     setIsDialogOpen(true);
   };
 
@@ -160,23 +165,31 @@ export default function IPhoneCategoryPage() {
     const capacityKey = toDisplay(selectedCapacity);
 
     if (!selectedProduct) {
-      toast({ title: '繧ｨ繝ｩ繝ｼ', description: '蝠・刀縺碁∈謚槭＆繧後※縺・∪縺帙ｓ縲・, variant: 'destructive' });
+      toast({
+        title: "エラー",
+        description: "商品が選択されていません。",
+        variant: "destructive",
+      });
       return;
     }
     if (!colorKey || !capacityKey) {
-      toast({ title: '驕ｸ謚槭＠縺ｦ縺上□縺輔＞', description: '繧ｫ繝ｩ繝ｼ縺ｨ螳ｹ驥上ｒ驕ｸ謚槭＠縺ｦ縺上□縺輔＞', variant: 'destructive' });
+      toast({
+        title: "未入力です",
+        description: "カラーと容量を選択してください。",
+        variant: "destructive",
+      });
       return;
     }
 
-    if (status === 'loading') return;
-    if (status !== 'authenticated') {
+    if (status === "loading") return;
+    if (status !== "authenticated") {
       toast({
-        title: '繝ｭ繧ｰ繧､繝ｳ縺悟ｿ・ｦ√〒縺・,
-        description: '蝠・刀繧偵き繝ｼ繝医↓霑ｽ蜉縺吶ｋ縺ｫ縺ｯ繝ｭ繧ｰ繧､繝ｳ縺励※縺上□縺輔＞縲・,
-        variant: 'destructive',
+        title: "ログインが必要です",
+        description:
+          "カートに追加するにはログインが必要です。ログイン画面へ移動します。",
+        variant: "destructive",
       });
-      const url = typeof window !== 'undefined' ? window.location.href : '/';
-      // 笨・NextAuth 縺ｮ pages.signIn 縺ｫ萓晏ｭ倥○縺壹∽ｸ闊ｬ繝ｭ繧ｰ繧､繝ｳ縺ｸ閾ｪ蜑埼・遘ｻ
+      const url = typeof window !== "undefined" ? window.location.href : "/";
       router.push(`/auth/login?callbackUrl=${encodeURIComponent(url)}`);
       return;
     }
@@ -188,22 +201,24 @@ export default function IPhoneCategoryPage() {
       );
 
       if (!variant) {
+        // 念のためDB再問い合わせ
         let q = supabase
-          .from('product_variants')
-          .select('id,color,capacity')
-          .eq('product_id', selectedProduct.id)
-          .eq('is_hidden', false); // 笘・髱櫁｡ｨ遉ｺ繧帝勁螟・
+          .from("product_variants")
+          .select("id,color,capacity")
+          .eq("product_id", selectedProduct.id)
+          .eq("is_hidden", false);
+
         if (isNA(colorKey)) {
           // @ts-ignore
-          q = q.or('color.is.null,color.eq.N/A');
+          q = q.or("color.is.null,color.eq.N/A");
         } else {
-          q = q.eq('color', normalize(colorKey));
+          q = q.eq("color", normalize(colorKey));
         }
         if (isNA(capacityKey)) {
           // @ts-ignore
-          q = q.or('capacity.is.null,capacity.eq.N/A');
+          q = q.or("capacity.is.null,capacity.eq.N/A");
         } else {
-          q = q.eq('capacity', normalize(capacityKey));
+          q = q.eq("capacity", normalize(capacityKey));
         }
 
         const { data } = await q.maybeSingle();
@@ -212,9 +227,9 @@ export default function IPhoneCategoryPage() {
 
       if (!variant?.id) {
         toast({
-          title: '邨・∩蜷医ｏ縺帙′隕九▽縺九ｊ縺ｾ縺帙ｓ',
-          description: `驕ｸ謚・ ${colorKey} / ${capacityKey}`,
-          variant: 'destructive',
+          title: "在庫が見つかりません",
+          description: `選択：${colorKey} / ${capacityKey}`,
+          variant: "destructive",
         });
         return;
       }
@@ -222,22 +237,22 @@ export default function IPhoneCategoryPage() {
       const ok = await addToCart(String(variant.id), colorKey, capacityKey);
       if (ok) {
         toast({
-          title: '繧ｫ繝ｼ繝医↓霑ｽ蜉縺励∪縺励◆',
-          description: `${selectedProduct.name}・・{colorKey}, ${capacityKey}・荏,
+          title: "カートに追加しました",
+          description: `${selectedProduct.name}（${colorKey}, ${capacityKey}）`,
         });
         setIsDialogOpen(false);
       } else {
         toast({
-          title: '繧ｨ繝ｩ繝ｼ',
-          description: '繧ｫ繝ｼ繝医↓霑ｽ蜉縺ｧ縺阪∪縺帙ｓ縺ｧ縺励◆',
-          variant: 'destructive',
+          title: "エラー",
+          description: "カートに追加に失敗しました。",
+          variant: "destructive",
         });
       }
     } catch {
       toast({
-        title: '繧ｨ繝ｩ繝ｼ',
-        description: '繧ｫ繝ｼ繝郁ｿｽ蜉荳ｭ縺ｫ繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆',
-        variant: 'destructive',
+        title: "エラー",
+        description: "カート処理中に問題が発生しました。",
+        variant: "destructive",
       });
     } finally {
       setIsAddingToCart(false);
@@ -270,7 +285,7 @@ export default function IPhoneCategoryPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* 繝倥ャ繝繝ｼ・医き繝ｼ繝医い繧､繧ｳ繝ｳ蜑企勁貂医∩・・*/}
+      {/* ヘッダー（戻る＋タイトル） */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center">
           <Link
@@ -278,29 +293,32 @@ export default function IPhoneCategoryPage() {
             className="flex items-center text-sm text-muted-foreground hover:text-primary mr-4"
           >
             <ArrowLeft className="mr-1 h-4 w-4" />
-            繝帙・繝縺ｫ謌ｻ繧・          </Link>
-          <h1 className="text-3xl font-bold">iPhone雋ｷ蜿・/h1>
+            トップへ戻る
+          </Link>
+          <h1 className="text-3xl font-bold">iPhone</h1>
         </div>
       </div>
 
-      {/* 蝠・刀繧ｰ繝ｪ繝・ラ・亥・繧ｳ繝ｼ繝蛾壹ｊ・・*/}
+      {/* グリッド：SP2 / TB3 / PC4 列 */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         {products.map((product) => {
-          let imageUrl = '/placeholder.svg?height=300&width=300';
+          let imageUrl = "/placeholder.svg?height=300&width=300";
           if (product.image_url) {
-            if (product.image_url.startsWith('http')) {
+            if (product.image_url.startsWith("http")) {
               imageUrl = product.image_url;
             } else {
-              const { data } = supabase
-                .storage
-                .from('product-images')
+              const { data } = supabase.storage
+                .from("product-images")
                 .getPublicUrl(product.image_url);
               imageUrl = data.publicUrl;
             }
           }
           return (
             <Card key={product.id} className="overflow-hidden group">
-              <Link href={`/products/iphone/${product.id}`} className="block relative z-0">
+              <Link
+                href={`/products/iphone/${product.id}`}
+                className="block relative z-0"
+              >
                 <CardHeader className="p-0">
                   <div className="relative aspect-square">
                     <Image
@@ -320,15 +338,18 @@ export default function IPhoneCategoryPage() {
                     {product.description}
                   </p>
                   <p className="font-bold text-base md:text-lg">
-                    譛螟ｧ ﾂ･{getMaxPrice(product).toLocaleString()}
+                    買取上限 ¥{getMaxPrice(product).toLocaleString()}
                   </p>
                 </CardContent>
               </Link>
 
               <CardFooter className="p-3 md:p-4 pt-0 flex gap-2 relative z-10">
-                <Link href={`/products/iphone/${product.id}`} className="hidden md:block">
+                <Link
+                  href={`/products/iphone/${product.id}`}
+                  className="hidden md:block"
+                >
                   <Button variant="outline" size="sm">
-                    隧ｳ邏ｰ繧定ｦ九ｋ
+                    詳細を見る
                   </Button>
                 </Link>
                 <Button
@@ -341,7 +362,7 @@ export default function IPhoneCategoryPage() {
                     openCartDialog(product);
                   }}
                 >
-                  繧ｫ繝ｼ繝医↓蜈･繧後ｋ
+                  カートに入れる
                 </Button>
               </CardFooter>
             </Card>
@@ -349,16 +370,16 @@ export default function IPhoneCategoryPage() {
         })}
       </div>
 
-      {/* 繝舌Μ繧｢繝ｳ繝磯∈謚槭ム繧､繧｢繝ｭ繧ｰ・亥・繧ｳ繝ｼ繝蛾壹ｊ・・*/}
+      {/* オプション選択ダイアログ */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           className="sm:max-w-[425px]"
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle>繧ｪ繝励す繝ｧ繝ｳ繧帝∈謚・/DialogTitle>
+            <DialogTitle>オプションを選択</DialogTitle>
             <DialogDescription className="sr-only">
-              繧ｫ繝ｩ繝ｼ縺ｨ螳ｹ驥上ｒ驕ｸ謚槭＠縺ｦ縺上□縺輔＞
+              カラーと容量を選択してください
             </DialogDescription>
           </DialogHeader>
 
@@ -367,14 +388,14 @@ export default function IPhoneCategoryPage() {
               {selectedProduct && (
                 <>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium block">繧ｫ繝ｩ繝ｼ</label>
+                    <label className="text-sm font-medium block">カラー</label>
                     {!isMobile ? (
                       <Select
                         value={selectedColor}
                         onValueChange={(v) => setSelectedColor(String(v))}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="繧ｫ繝ｩ繝ｼ繧帝∈謚・ />
+                          <SelectValue placeholder="カラーを選択" />
                         </SelectTrigger>
                         <SelectContent>
                           {availableColors.map((color) => (
@@ -390,7 +411,7 @@ export default function IPhoneCategoryPage() {
                         value={selectedColor}
                         onChange={(e) => setSelectedColor(e.target.value)}
                       >
-                        <option value="">繧ｫ繝ｩ繝ｼ繧帝∈謚・/option>
+                        <option value="">カラーを選択</option>
                         {availableColors.map((color) => (
                           <option key={color} value={color}>
                             {color}
@@ -401,7 +422,7 @@ export default function IPhoneCategoryPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium block">螳ｹ驥・/label>
+                    <label className="text-sm font-medium block">容量</label>
                     {!isMobile ? (
                       <Select
                         value={selectedCapacity}
@@ -409,7 +430,7 @@ export default function IPhoneCategoryPage() {
                         disabled={!selectedColor}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="螳ｹ驥上ｒ驕ｸ謚・ />
+                          <SelectValue placeholder="容量を選択" />
                         </SelectTrigger>
                         <SelectContent>
                           {availableCapacities.map((cap) => (
@@ -426,7 +447,7 @@ export default function IPhoneCategoryPage() {
                         onChange={(e) => setSelectedCapacity(e.target.value)}
                         disabled={!selectedColor}
                       >
-                        <option value="">螳ｹ驥上ｒ驕ｸ謚・/option>
+                        <option value="">容量を選択</option>
                         {availableCapacities.map((cap) => (
                           <option key={cap} value={cap}>
                             {cap}
@@ -439,8 +460,8 @@ export default function IPhoneCategoryPage() {
                   <div className="mt-2">
                     <p className="text-lg font-bold">
                       {selectedVariant
-                        ? `ﾂ･${selectedVariant.buyback_price.toLocaleString()}`
-                        : '蝠・刀繧帝∈謚槭＠縺ｦ縺上□縺輔＞'}
+                        ? `¥${selectedVariant.buyback_price.toLocaleString()}`
+                        : "カラーと容量を選択してください"}
                     </p>
                   </div>
                 </>
@@ -454,18 +475,22 @@ export default function IPhoneCategoryPage() {
                 onClick={() => setIsDialogOpen(false)}
                 disabled={isAddingToCart}
               >
-                繧ｭ繝｣繝ｳ繧ｻ繝ｫ
+                キャンセル
               </Button>
               <Button
                 type="submit"
                 disabled={
                   isAddingToCart ||
-                  status === 'loading' ||
+                  status === "loading" ||
                   !selectedColor ||
                   !selectedCapacity
                 }
               >
-                {status === 'loading' ? '繝ｭ繧ｰ繧､繝ｳ遒ｺ隱堺ｸｭ窶ｦ' : isAddingToCart ? '霑ｽ蜉荳ｭ窶ｦ' : '繧ｫ繝ｼ繝医↓霑ｽ蜉'}
+                {status === "loading"
+                  ? "ログイン確認中…"
+                  : isAddingToCart
+                  ? "追加中…"
+                  : "カートに追加"}
               </Button>
             </DialogFooter>
           </form>
