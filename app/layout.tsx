@@ -1,26 +1,18 @@
-import React from "react";
+// app/layout.tsx  ← "use client" は付けない（サーバーコンポーネント）
+import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-import { Providers } from "@/components/providers"; // ← これが next-auth の SessionProvider を内包
-import { AuthProvider } from "@/contexts/auth-context";
-import { CartProvider } from "@/contexts/cart-context";
-import { HeaderAndPad } from "@/app/_components/header-gate";
+import ClientRoot from "./_components/client-root"; // ← クライアント側に集約
 
 const inter = Inter({ subsets: ["latin"] });
 
-// ✅ 環境ごとに自動切り替え
+// ✅ 環境ごとに自動切り替え（サーバー評価OK）
 const isProd = process.env.NODE_ENV === "production";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (isProd ? "https://kaitori-hunt.com" : "http://192.168.10.107:3004");
-
-const defaultTitle =
-  "買取ハント｜新品・未使用ランク特化の高価買取サービス｜即日入金・全国対応";
-
-const defaultDescription =
-  "買取ハントは新品・未使用ランクに特化した高価買取サービスです。iPhone・カメラ・ゲーム機などを全国からご郵送いただき、査定成立後は最短即日入金。安心・透明な取引をお約束します。";
 
 // ---- Viewport（スマホ最適・セーフエリア対応）----
 export const viewport: Viewport = {
@@ -29,7 +21,12 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-// ✅ metadataBase を環境に応じて動的に設定
+// ✅ metadataBase を環境に応じて動的に設定（サーバーOK）
+const defaultTitle =
+  "買取ハント｜新品・未使用ランク特化の高価買取サービス｜即日入金・全国対応";
+const defaultDescription =
+  "買取ハントは新品・未使用ランクに特化した高価買取サービスです。iPhone・カメラ・ゲーム機などを全国からご郵送いただき、査定成立後は最短即日入金。安心・透明な取引をお約束します。";
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -76,27 +73,15 @@ export const metadata: Metadata = {
   generator: "nextjs",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ja" className="h-full" suppressHydrationWarning>
       <head />
       <body
         className={`min-h-[100svh] overflow-x-hidden bg-background text-foreground antialiased ${inter.className}`}
       >
-        {/* 🔁 ここを最外層に：SessionProvider を含む Providers */}
-        <Providers>
-          {/* ここから下は SessionProvider の内側で OK */}
-          <AuthProvider>
-            <CartProvider>
-              {/* HeaderAndPad 内で <Header /> と main 余白を処理 */}
-              <HeaderAndPad>{children}</HeaderAndPad>
-            </CartProvider>
-          </AuthProvider>
-        </Providers>
+        {/* ↓ クライアント要素は 1 枚下の Client コンポーネントに集約 */}
+        <ClientRoot>{children}</ClientRoot>
       </body>
     </html>
   );
