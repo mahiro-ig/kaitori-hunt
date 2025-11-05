@@ -1,16 +1,18 @@
-// app/api/me/route.ts
+// /app/api/me/route.ts
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 // DB から取得するユーザー情報の型
 type DbUser = {
   id: string;
-  name: string;
-  email: string;
+  public_id: string | null;
+  name: string | null;
+  email: string | null;
   phone: string | null;
   postal_code: string | null;
   address: string | null;
@@ -22,7 +24,7 @@ type DbUser = {
   created_at: string; // 会員登録日
 };
 
-export async function GET(request: Request) {
+export async function GET() {
   // NextAuth セッション取得
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id;
@@ -30,6 +32,9 @@ export async function GET(request: Request) {
   if (!userId) {
     return NextResponse.json({ error: "未認証です" }, { status: 401 });
   }
+
+  // Service Role クライアントは “ここで” 遅延初期化
+  const supabaseAdmin = getSupabaseAdmin();
 
   // users テーブルから public_id を含めて取得
   const { data: dbData, error: dbError } = await supabaseAdmin
@@ -52,10 +57,10 @@ export async function GET(request: Request) {
       `
     )
     .eq("id", userId)
-    .single();
+    .single<DbUser>();
 
   if (dbError || !dbData) {
-    console.error("[me] users table error:", dbError);
+    console.error("[/api/me] users fetch error:", dbError);
     return NextResponse.json(
       { error: "ユーザー情報の取得に失敗しました" },
       { status: 500 }
@@ -65,10 +70,9 @@ export async function GET(request: Request) {
   // レスポンス整形
   const userProfile = {
     id: dbData.id,
-    // @ts-ignore: public_id は型に定義されていませんがDB上には存在します
     publicId: dbData.public_id ?? "",
-    name: dbData.name,
-    email: dbData.email,
+    name: dbData.name ?? "",
+    email: dbData.email ?? "",
     phone: dbData.phone ?? "",
     postalCode: dbData.postal_code ?? "",
     address: dbData.address ?? "",
@@ -80,5 +84,7 @@ export async function GET(request: Request) {
     createdAt: dbData.created_at,
   };
 
-  return NextResponse.json(userProfile);
+  return NextResponse.json(userProfile, {
+    headers: { "Cache-Control": "no-store" },
+  });
 }
