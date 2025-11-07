@@ -15,12 +15,7 @@ export default function NotFound() {
         >
           トップへ戻る
         </Link>
-        <Link
-          href="/categories"
-          className="inline-flex items-center rounded-md border px-4 py-2"
-        >
-          カテゴリ一覧
-        </Link>
+        
       </div>
     </div>
   );
