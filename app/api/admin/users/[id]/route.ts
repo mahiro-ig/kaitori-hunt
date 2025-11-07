@@ -2,27 +2,25 @@
 export const runtime = "nodejs";
 
 import { NextResponse, type NextRequest } from "next/server";
-import { supabaseAdmin } from "@/lib/supabaseAdmin"; // ← 環境に合わせてパスを確認
+import { supabaseAdmin } from "@/lib/supabaseAdmin"; 
 import { requireAdminAPI } from "@/lib/auth";
 
-// 共通: レスポンスに no-store を付与
+
 const noStore = { headers: { "Cache-Control": "no-store" } } as const;
 
-// 簡易 public_id バリデーション（必要なら強化可）
+
 function looksLikePublicId(v: string) {
-  // UUID 風 / もしくは英数ハイフンのみ
+
   return /^[0-9a-z-]{6,}$/i.test(v);
 }
 
-// ================================
-// GET /api/admin/users/:id → ユーザー詳細取得
-// ================================
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // 認可（APIキー or セッション+admin_users）
+    
     await requireAdminAPI(_request);
 
     if (!supabaseAdmin) {
@@ -47,7 +45,6 @@ export async function GET(
           "postal_code",
           "address",
           "created_at",
-          "status",
           "bank_name",
           "branch_name",
           "account_type",
@@ -75,15 +72,13 @@ export async function GET(
   }
 }
 
-// ================================
-// PUT /api/admin/users/:id → ユーザー情報更新
-// ================================
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // 認可（APIキー or セッション+admin_users）
+    
     await requireAdminAPI(request);
 
     if (!supabaseAdmin) {
@@ -96,7 +91,7 @@ export async function PUT(
       return NextResponse.json({ error: "不正なIDです" }, { status: 400, ...noStore });
     }
 
-    // JSON 取得（壊れていても落とさない）
+    
     const body = await request.json().catch(() => ({} as Record<string, unknown>));
 
     const {
@@ -104,22 +99,21 @@ export async function PUT(
       email,
       phone,
       address,
-      status,
       bank_name,
       branch_name,
       account_type,
       account_number,
       account_name,
-      postal_code, // もし更新対象に含めたいなら拾っておく
+      postal_code,
+      
     } = body as Record<string, unknown>;
 
-    // 更新フィールド組み立て（型をざっくりチェック）
+    // 更新フィールド組み立て
     const updates: Record<string, any> = {};
     if (typeof name === "string") updates.name = name;
     if (typeof email === "string") updates.email = email;
     if (typeof phone === "string") updates.phone = phone;
     if (typeof address === "string") updates.address = address;
-    if (typeof status === "string") updates.status = status;
     if (typeof bank_name === "string") updates.bank_name = bank_name;
     if (typeof branch_name === "string") updates.branch_name = branch_name;
     if (typeof account_type === "string") updates.account_type = account_type;
@@ -131,7 +125,6 @@ export async function PUT(
       return NextResponse.json({ error: "更新対象がありません" }, { status: 400, ...noStore });
     }
 
-    // v2 では返り値が必要なら .select().single()/maybeSingle() が必要
     const { data, error } = await supabaseAdmin
       .from("users")
       .update(updates)
@@ -146,7 +139,6 @@ export async function PUT(
           "postal_code",
           "address",
           "created_at",
-          "status",
           "bank_name",
           "branch_name",
           "account_type",
