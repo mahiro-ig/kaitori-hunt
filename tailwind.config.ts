@@ -9,7 +9,7 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      /* ★ ここを追加 */
+      /* ここを追加 */
       fontFamily: {
         // next/font の CSS 変数を Tailwind の font-sans に紐づけ
         sans: [

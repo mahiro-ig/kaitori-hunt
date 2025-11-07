@@ -119,7 +119,7 @@ export async function PATCH(
       );
     }
 
-    // ステータス履歴（★ 旧来のスキーマに限定：purchase_id / status / note / created_at）
+    // ステータス履歴（旧来のスキーマに限定：purchase_id / status / note / created_at）
     await supabaseAdmin.from("purchase_status_history").insert({
       purchase_id: existing.id,
       status: "査定完了",

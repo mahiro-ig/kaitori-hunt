@@ -54,7 +54,7 @@ export default function CameraProductDetailPage() {
         if (prodErr || !prod) throw prodErr ?? new Error("Product not found");
         setProduct(prod);
 
-        // ★ 可視バリアントのみ取得（非表示は除外）
+        //  可視バリアントのみ取得（非表示は除外）
         const { data: vars, error: varErr } = await supabase
           .from("product_variants")
           .select("*")

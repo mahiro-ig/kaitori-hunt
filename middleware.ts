@@ -24,7 +24,7 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS ?? "")
   .map((s) => s.trim().toLowerCase())
   .filter(Boolean);
 
-// ✅ middleware にもマッチさせる（/api/admin/** も対象にする）
+// middleware にもマッチさせる（/api/admin/** も対象にする）
 export const config = {
   matcher: [
     "/((?!_next|.*\\..*).*)", // 既存（api を除外）
@@ -138,7 +138,7 @@ export default async function middleware(req: NextRequest) {
 
   // ---- C) /api/admin/** 認可 ----
   if (pathname.startsWith(ADMIN_API_PREFIX)) {
-    // ✅ CORS プリフライトは素通し
+    // CORS プリフライトは素通し
     if (req.method === "OPTIONS") {
       return withSecurityHeaders(req, NextResponse.json({}, { status: 204 }));
     }
@@ -196,12 +196,12 @@ export default async function middleware(req: NextRequest) {
   if (pathname.startsWith("/dashboard")) {
     const { token } = await readAuth(req);
 
-    // ✅ Cookie 未反映なら1回だけ素通し
+    // Cookie 未反映なら1回だけ素通し
     if (!token) {
       return withSecurityHeaders(req, NextResponse.next());
     }
 
-    // ✅ 未ログインならログインへ
+    // 未ログインならログインへ
     if (!token?.email) {
       const to = url.clone();
       to.pathname = "/auth/login";

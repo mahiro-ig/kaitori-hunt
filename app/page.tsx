@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, Camera, Gamepad, Smartphone, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-// import { Header } from "@/components/header"; // ← 削除（レイアウトで出す）
+
 import { supabase } from "@/lib/supabase";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
@@ -45,7 +45,7 @@ function NewsSection() {
       <div className="mx-auto max-w-7xl px-4 md:px-6">
         <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <div className="space-y-2">
-            {/* ▼ フレーズだけ差し替え（SEO見出しの階層は維持） */}
+            {/*  フレーズだけ差し替え */}
             <h2 id="news-heading" className="text-3xl font-bold tracking-tighter md:text-4xl">
               ニュース
             </h2>
@@ -119,7 +119,7 @@ export default function Home() {
     };
   }, []);
 
-  // ★ 既存ロジック維持：非表示バリアントを除外するパラメータを追加
+  // 既存ロジック維持：非表示バリアントを除外するパラメータを追加
   const onSubmitSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const params = new URLSearchParams();
@@ -141,7 +141,7 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-10 xl:gap-12 place-items-center">
               <div className="flex flex-col justify-center space-y-3 w-full">
                 <div className="space-y-2">
-                  {/* ▼ フレーズ更新（ブランド軸） */}
+                  {/* フレーズ更新（ブランド軸） */}
                   <h1 id="hero-heading" className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none lg:whitespace-nowrap lg:leading-none">
                     国内最高値買取・即日現金化
                   </h1>

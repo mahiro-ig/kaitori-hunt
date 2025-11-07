@@ -17,5 +17,5 @@ export function HeaderAndPad({ children }: PropsWithChildren) {
   );
 }
 
-// ✅ default export を必ず用意
+// default export を必ず用意
 export default HeaderAndPad;

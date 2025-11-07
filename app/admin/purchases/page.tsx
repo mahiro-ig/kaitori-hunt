@@ -84,7 +84,7 @@ function safeParseItems(src: unknown): any[] {
   }
 }
 
-/** ✅ 数量合計（未指定は1としてカウント）を返す */
+/** 数量合計（未指定は1としてカウント）を返す */
 function countItems(items: any[]): number {
   if (!Array.isArray(items)) return 0;
   return items.reduce((sum, it) => {
@@ -331,7 +331,7 @@ export default function PurchasesPage() {
                 {paginated.map((r) => {
                   const userName = r.user?.name ?? "(不明)";
                   const userEmail = r.user?.email ?? "";
-                  const itemCount = countItems(r.items); // ✅ 数量合計
+                  const itemCount = countItems(r.items); 
                   return (
                     <TableRow key={r.id}>
                       <TableCell className="font-medium">

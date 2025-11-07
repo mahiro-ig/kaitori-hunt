@@ -166,7 +166,7 @@ export default function SearchPage() {
   useEffect(() => {
     runSearch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialKeyword, initialCategory, visibleOnly]); // 注: URLパラメータ変化で再検索
+  }, [initialKeyword, initialCategory, visibleOnly]); 
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();

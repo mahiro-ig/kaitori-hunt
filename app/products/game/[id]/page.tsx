@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react"; // ShoppingCart 削除
+import { ArrowLeft } from "lucide-react"; 
 import { useParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import type { Database } from "@/lib/database.types";
@@ -111,7 +111,7 @@ export default function GameProductDetailPage() {
   ).filter(Boolean);
 
   const selectedVariant = variants.find((v) => v.color === selectedColor);
-  const isDiscontinued = variants.length === 0; // ★ 可視バリアントが0件なら取扱停止
+  const isDiscontinued = variants.length === 0; 
 
   const handleAddToCart = async () => {
     if (!selectedVariant) {

@@ -14,7 +14,7 @@
 
 @layer base {
   :root {
-    /* ✅ 追加: ヘッダーの高さ（モバイル基準） */
+    
     --app-header-h: 56px;
 
     --background: 0 0% 100%;
@@ -52,7 +52,7 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
-  /* ✅ 追加: PC時のヘッダー高さ */
+  
   @media (min-width: 768px) {
     :root {
       --app-header-h: 64px;

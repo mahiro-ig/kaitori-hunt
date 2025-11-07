@@ -20,7 +20,7 @@ export function Header() {
   const { t } = useLanguage();
   const { data: session, status } = useSession();
 
-  // ✅ 判定：ロード中は一切「マイページ」を出さない
+  
   const isLoggedIn = status === "authenticated" && !!session?.user;
 
   const { items } = useCart();
@@ -80,7 +80,7 @@ export function Header() {
                 </Button>
               </SheetTrigger>
 
-              {/* ✅ status で再マウント。loading中は「ログイン/新規登録」扱い */}
+              {/* 再マウント */}
               <SheetContent
                 key={status}
                 side="left"
