@@ -124,79 +124,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      {/* お問い合わせフォーム */}
-      <div className="max-w-xl mx-auto mb-16">
-        <h2 className="text-2xl font-bold text-center mb-4">お問い合わせ</h2>
-        <p className="text-muted-foreground text-center mb-6">
-          買取に関するご質問やお問い合わせは、こちらよりお気軽にご連絡ください。
-        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium mb-1">
-              お名前<span className="text-red-500">*</span>
-            </label>
-            <input
-              id="name"
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1">
-              メールアドレス<span className="text-red-500">*</span>
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium mb-1">
-              電話番号<span className="text-red-500">*</span>
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              required
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium mb-1">
-              お問い合わせ内容<span className="text-red-500">*</span>
-            </label>
-            <textarea
-              id="message"
-              required
-              rows={6}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="w-full border rounded px-3 py-2"
-            />
-          </div>
-          <div className="text-center">
-            <Button type="submit" disabled={status === "sending"}>
-              {status === "sending" ? "送信中…" : "送信する"}
-            </Button>
-          </div>
-          {status === "success" && (
-            <p className="text-green-600 text-center">お問い合わせを受け付けました。ありがとうございました。</p>
-          )}
-          {status === "error" && (
-            <p className="text-red-600 text-center">送信中にエラーが発生しました。後ほど再度お試しください。</p>
-          )}
-        </form>
-      </div>
     </div>
   )
 }
