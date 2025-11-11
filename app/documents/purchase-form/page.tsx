@@ -127,33 +127,25 @@ export default function PurchaseFormPage() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-4">
-                <li className="flex items-start">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs mr-2">
-                    1
-                  </span>
-                  <div>
-                    <p className="font-medium">買取依頼書（必須）</p>
-                    <p className="text-sm text-muted-foreground">記入・署名済みのもの</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs mr-2">
-                    2
-                  </span>
-                  <div>
-                    <p className="font-medium">住民票の写し（必須）</p>
-                    <p className="text-sm text-muted-foreground">発行から3ヶ月以内の原本</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs mr-2">
-                    3
-                  </span>
-                  <div>
-                    <p className="font-medium">保護者同意書（18歳未満の方のみ）</p>
-                    <p className="text-sm text-muted-foreground">親権者の署名・捺印が必要</p>
-                  </div>
-                </li>
+                {[
+                  { num: "1", title: "買取依頼書（必須）", desc: "記入・署名済みのもの" },
+                  { num: "2", title: "住民票の写し（必須）", desc: "発行から3ヶ月以内の原本" },
+                  {
+                    num: "3",
+                    title: "保護者同意書（18歳未満の方のみ）",
+                    desc: "親権者の署名・捺印が必要",
+                  },
+                ].map((item) => (
+                  <li key={item.num} className="flex items-start">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs mr-2 shrink-0">
+                      {item.num}
+                    </span>
+                    <div>
+                      <p className="font-medium">{item.title}</p>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </li>
+                ))}
               </ul>
             </CardContent>
           </Card>
