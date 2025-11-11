@@ -117,12 +117,11 @@ export default function PurchaseFormPage() {
                     <li>買取依頼書は必ず記入・署名の上、商品と一緒に発送してください。</li>
                     <li>記入漏れや署名がない場合、買取手続きが遅れる場合があります。</li>
                     <li>
-                      <span className="font-medium">【提出対象の補足】</span>
-                      必要書類②「住民票の写しまたは印鑑証明書」は、
+                      必要書類一覧②「住民票の写しまたは印鑑証明書」は、
                       <span className="underline">初回の方</span>
                       と
                       <span className="underline">前回提出から1年以上経過している方</span>
-                      が提出対象です（いずれも発行から3ヶ月以内の原本）。
+                      が提出対象です。（いずれも発行から3ヶ月以内の原本）
                     </li>
                     <li>18歳未満の方は、保護者同意書も必要です。</li>
                   </ul>
