@@ -116,6 +116,14 @@ export default function PurchaseFormPage() {
                   <ul className="list-disc list-inside mt-1 space-y-1">
                     <li>買取依頼書は必ず記入・署名の上、商品と一緒に発送してください。</li>
                     <li>記入漏れや署名がない場合、買取手続きが遅れる場合があります。</li>
+                    <li>
+                      <span className="font-medium">【提出対象の補足】</span>
+                      必要書類②「住民票の写しまたは印鑑証明書」は、
+                      <span className="underline">初回の方</span>
+                      と
+                      <span className="underline">前回提出から1年以上経過している方</span>
+                      が提出対象です（いずれも発行から3ヶ月以内の原本）。
+                    </li>
                     <li>18歳未満の方は、保護者同意書も必要です。</li>
                   </ul>
                 </AlertDescription>
@@ -158,7 +166,7 @@ export default function PurchaseFormPage() {
                   <li className="pl-2">
                     <span className="font-medium">署名欄に署名</span>
                     <p className="text-sm text-muted-foreground mt-1 pl-6">
-                      署名欄に自筆で署名し、必要に応じて捺印してください。
+                      署名欄に自筆で署名の上、捺印してください。
                     </p>
                   </li>
                 </ol>
@@ -178,7 +186,11 @@ export default function PurchaseFormPage() {
               <ul className="space-y-4">
                 {[
                   { num: "1", title: "買取依頼書（必須）", desc: "記入・署名済みのもの" },
-                  { num: "2", title: "住民票の写しまたは印鑑証明書", desc: "発行から3ヶ月以内の原本" },
+                  {
+                    num: "2",
+                    title: "住民票の写しまたは印鑑証明書",
+                    desc: "発行から3ヶ月以内の原本（初回および前回提出から1年以上経過の方）",
+                  },
                   {
                     num: "3",
                     title: "保護者同意書（18歳未満の方のみ）",
