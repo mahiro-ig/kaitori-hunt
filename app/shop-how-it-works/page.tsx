@@ -1,7 +1,7 @@
 // app/shop-how-it-works/page.tsx
 import Link from "next/link"
 import Image from "next/image"
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, CheckCircle2, Clock } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -211,8 +211,24 @@ export default function ShopHowItWorksPage() {
         <p className="text-sm font-semibold text-yellow-700 mb-4 leading-relaxed">
           店舗所在地: 〒950-0087 新潟県新潟市中央区東大通1-2-30 第3マルカビル 10F 
         </p>
-        <p className="text-sm text-yellow-700">
-          <strong>申込承認メール受信後、当日営業時間内にご来店ください。</strong>混雑状況により査定にお時間をいただく場合がございます。ご予約の無い方の買取につきましては、ご来店時に店内にて買取申込をしていただきます。また、買取価格は申込時の承認価格が適用されます。
+
+        {/* 追記：営業時間 */}
+        <div className="mt-2 bg-white/50 border border-yellow-200 rounded-md p-4">
+          <p className="text-sm font-semibold text-yellow-800 flex items-center">
+            <Clock className="h-4 w-4 mr-2" />
+            営業時間
+          </p>
+          <ul className="mt-2 text-sm text-yellow-700 space-y-1">
+            <li><span className="font-medium">平日</span>: 10:00〜18:00</li>
+            <li><span className="font-medium">土曜日</span>: 10:00〜17:00</li>
+            <li><span className="font-medium">定休日</span>: 日曜日、祝日</li>
+          </ul>
+        </div>
+
+        <p className="text-sm text-yellow-700 mt-4">
+          <strong>申込承認メール受信後、当日営業時間内にご来店ください。</strong>
+          混雑状況により査定にお時間をいただく場合がございます。ご予約の無い方の買取につきましては、ご来店時に店内にて買取申込をしていただきます。
+          また、買取価格は申込時の承認価格が適用されます。
         </p>
       </div>
 
