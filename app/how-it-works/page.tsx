@@ -192,10 +192,10 @@ export default function HowItWorksPage() {
           <li className="flex items-start">
             <CheckCircle2 className="h-5 w-5 mr-2 text-primary shrink-0" />
             <div>
-              <span className="font-medium">本人確認書類(2点)</span>
+              <span className="font-medium">本人確認書類(最大2点)</span>
               <p className="text-sm text-muted-foreground break-words">
                 運転免許証、マイナンバーカード、在留カード等のコピー1点<br/>
-                住民票の写しもしくは印鑑証明書1点 （発行から3カ月以内）　　　※初回の方、前回提出から1年以上経過している方
+                住民票の写しもしくは印鑑証明書1点 （発行から3カ月以内）　※初回の方、前回提出から1年以上経過している方
               </p>
             </div>
           </li>
