@@ -110,7 +110,7 @@ export async function sendBuybackSubmittedEmail(args: {
         ※郵送の場合は、受付日当日中の発送をお願いいたします。<br/>
         ※店頭買取の場合は、受付日営業時間内にご来店ください。<br/>
       </p>
-      <p>マイページ：https://kaitori-hunt.jp/dashboard</p>
+      <p>マイページ：https://kaitori-hunt.com/dashboard</p>
       <p style="font-size:12px;color:#666;">本メールにお心当たりのない場合は破棄してください。</p>
     </div>
   `;
