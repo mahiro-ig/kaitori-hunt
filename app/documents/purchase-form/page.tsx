@@ -8,17 +8,70 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 export default function PurchaseFormPage() {
-  // PDFダウンロード処理
-  const handleDownload = () => {
-    // public配下に配置したPDFへのパス（例: /public/docs/買取依頼書_買取同意書.pdf）
-    const pdfUrl = "/docs/買取依頼書_買取同意書.pdf"
+  // public配下に配置したPDFへのパス（例: /public/docs/買取依頼書_買取同意書.pdf）
+  const pdfUrl = "/docs/買取依頼書_買取同意書.pdf"
 
+  // PDFダウンロード
+  const handleDownload = () => {
     const link = document.createElement("a")
     link.href = pdfUrl
     link.download = "[買取ハント]買取依頼書.pdf"
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+  }
+
+  // PDFを直接印刷（ページではなくPDF自体を印刷）
+  const handlePrintPdf = () => {
+    try {
+      // 非表示iframeを作ってPDFを読み込み → 読み込み完了時に印刷
+      const iframe = document.createElement("iframe")
+      iframe.style.visibility = "hidden"
+      iframe.style.position = "fixed"
+      iframe.style.right = "0"
+      iframe.style.bottom = "0"
+      iframe.style.width = "0"
+      iframe.style.height = "0"
+      // キャッシュでonloadが走らない環境向けにクエリを足しておく
+      iframe.src = `${pdfUrl}?t=${Date.now()}#view=FitH`
+
+      const cleanup = () => {
+        try {
+          document.body.removeChild(iframe)
+        } catch {}
+      }
+
+      let printed = false
+      iframe.onload = () => {
+        try {
+          iframe.contentWindow?.focus()
+          iframe.contentWindow?.print()
+          printed = true
+        } catch {
+          // 失敗時はフォールバック
+          window.open(pdfUrl, "_blank", "noopener,noreferrer")
+        } finally {
+          // 少し待ってから掃除
+          setTimeout(cleanup, 1000)
+        }
+      }
+
+      // onloadが来ない/ブロックされた場合のフォールバック（2秒）
+      const timer = setTimeout(() => {
+        if (!printed) {
+          try {
+            window.open(pdfUrl, "_blank", "noopener,noreferrer")
+          } finally {
+            cleanup()
+          }
+        }
+        clearTimeout(timer)
+      }, 2000)
+
+      document.body.appendChild(iframe)
+    } catch {
+      window.open(pdfUrl, "_blank", "noopener,noreferrer")
+    }
   }
 
   return (
@@ -51,13 +104,9 @@ export default function PurchaseFormPage() {
                   <FileDown className="mr-2 h-4 w-4" />
                   PDFをダウンロード
                 </Button>
-                <Button
-                  variant="outline"
-                  className="flex items-center"
-                  onClick={() => window.print()}
-                >
+                <Button variant="outline" className="flex items-center" onClick={handlePrintPdf}>
                   <Printer className="mr-2 h-4 w-4" />
-                  印刷する
+                  PDFを印刷
                 </Button>
               </div>
 
@@ -129,7 +178,7 @@ export default function PurchaseFormPage() {
               <ul className="space-y-4">
                 {[
                   { num: "1", title: "買取依頼書（必須）", desc: "記入・署名済みのもの" },
-                  { num: "2", title: "住民票の写し（必須）", desc: "発行から3ヶ月以内の原本" },
+                  { num: "2", title: "住民票の写しもしくは印鑑証明書", desc: "発行から3ヶ月以内の原本" },
                   {
                     num: "3",
                     title: "保護者同意書（18歳未満の方のみ）",
