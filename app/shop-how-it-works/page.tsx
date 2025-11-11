@@ -209,7 +209,7 @@ export default function ShopHowItWorksPage() {
       <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-lg max-w-3xl mx-auto mt-8 w-full">
         <h2 className="text-xl font-bold mb-4 text-yellow-800">来店について</h2>
         <p className="text-sm font-semibold text-yellow-700 mb-4 leading-relaxed">
-          店舗所在地: 〒950-0087 新潟県新潟市中央区東大通1-2-30 第3マルカビル 10F 
+          店舗所在地: 〒950-0087 新潟県新潟市中央区東大通1-2-30 第3マルカビル 10F 五十嵐商事株式会社
         </p>
 
         {/* 追記：営業時間 */}
