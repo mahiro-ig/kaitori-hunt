@@ -178,7 +178,7 @@ export default function PurchaseFormPage() {
               <ul className="space-y-4">
                 {[
                   { num: "1", title: "買取依頼書（必須）", desc: "記入・署名済みのもの" },
-                  { num: "2", title: "住民票の写しもしくは印鑑証明書", desc: "発行から3ヶ月以内の原本" },
+                  { num: "2", title: "住民票の写しまたは印鑑証明書", desc: "発行から3ヶ月以内の原本" },
                   {
                     num: "3",
                     title: "保護者同意書（18歳未満の方のみ）",
