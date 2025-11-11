@@ -193,7 +193,6 @@ export default function FaqPage() {
               <p className="font-semibold mb-1">2. 以下のいずれか 1点(原本)</p>
               <ul className="list-disc list-inside ml-2 text-sm">
                 <li>住民票の写し ※発行より3ヶ月以内でマイナンバーの記載のないもの</li>
-                <li>戸籍謄本 ※発行より3ヶ月以内で現住所の入ったもの</li>
                 <li>印鑑証明書 ※発行より3ヶ月以内のもの</li>
               </ul>
               <p className="text-sm mt-1 font-semibold">※２については、初回の方、前回提出から1年以上経過している方のみ</p>
