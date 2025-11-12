@@ -1,4 +1,4 @@
-// app/layout.tsx  ← "use client" は付けない（サーバーコンポーネント）
+// app/layout.tsx  ← サーバーコンポーネント（"use client" なし）
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
@@ -13,7 +13,7 @@ const inter = Inter({
   display: "swap",
 });
 
-// ★ CJK: preload は off、subsets は指定しない（←これがポイント）
+// CJK: preload off / subsets 指定しない
 const notoSansJP = Noto_Sans_JP({
   preload: false,
   weight: ["400", "500", "700", "800", "900"],
@@ -66,7 +66,18 @@ export const metadata: Metadata = {
   ...(isProd
     ? { alternates: { canonical: "https://kaitori-hunt.com" }, robots: { index: true, follow: true } }
     : { robots: { index: false, follow: false } }),
-  icons: { icon: "/favicon.ico", apple: "/apple-touch-icon.png" },
+
+  // ★ ここをしっかり指定
+  icons: {
+    icon: [
+      { url: "/favicon.ico", type: "image/x-icon" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/favicon-32x32.png", type: "image/png", sizes: "32x32" }, // あれば
+      { url: "/favicon-16x16.png", type: "image/png", sizes: "16x16" }, // あれば
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180" }], // 180x180
+  },
+  manifest: "/manifest.json", // PWAしない場合でも入れてOK（存在しないなら外す）
   generator: "nextjs",
 };
 
