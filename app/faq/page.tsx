@@ -260,13 +260,13 @@ export default function FaqPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              営業時間:平日 10:00〜19:00 / 土曜日 10:00〜17:00(日祝休み)
+              営業時間:平日 10:00〜18:00 / 土曜日 10:00〜17:00(日祝休み)
               <br />
               <span className="text-xs">※営業時間外はメールでのお問い合わせをご利用ください。</span>
             </p>
             <div className="flex items-center gap-2 mb-4">
               <Phone className="h-4 w-4" />
-              <a href="tel:0312345678" className="text-primary hover:underline text-lg font-semibold">
+              <a href="tel:0253338655" className="text-primary hover:underline text-lg font-semibold">
                 025-333-8655
               </a>
             </div>
