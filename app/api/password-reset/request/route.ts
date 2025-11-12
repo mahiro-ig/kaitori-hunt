@@ -67,7 +67,7 @@ export async function POST(req: Request) {
 
     // リセットURL（ENV優先、なければ既定）
     const origin =
-      (process.env.APP_ORIGIN || process.env.NEXT_PUBLIC_APP_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://kaitori-hunt.jp")
+      (process.env.APP_ORIGIN || process.env.NEXT_PUBLIC_APP_ORIGIN || process.env.NEXT_PUBLIC_SITE_URL || "https://kaitori-hunt.com")
         .replace(/\/+$/, "");
     const resetUrl = `${origin}/auth/reset-password?token=${token}`;
 

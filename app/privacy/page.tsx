@@ -144,8 +144,8 @@ export default function PrivacyPolicyPage() {
                 <div>TEL: 025-333-8655</div>
                 <div>
                   E-mail:{" "}
-                  <a href="mailto:info@kaitor-ihunt.com" className="underline underline-offset-4 hover:text-primary">
-                    info@kaitorihunt.jp
+                  <a href="mailto:info@kaitori-hunt.com" className="underline underline-offset-4 hover:text-primary">
+                    info@kaitori-hunt.com
                   </a>
                 </div>
               </address>
