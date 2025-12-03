@@ -2,6 +2,7 @@
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_JP } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 import ClientRoot from "./_components/client-root";
@@ -26,6 +27,9 @@ const isProd = process.env.NODE_ENV === "production";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (isProd ? "https://kaitori-hunt.com" : "http://192.168.10.107:3004");
+
+// ========== GA4 ID ==========
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-VGEMWXWGVV";
 
 // ---- Viewport ----
 export const viewport: Viewport = {
@@ -53,7 +57,12 @@ export const metadata: Metadata = {
       "新品・未使用ランクのiPhone・カメラ・ゲーム機などを高価買取。全国対応でお申し込み後、査定成立時は最短即日入金。安心・透明な買取サービス『買取ハント』。",
     locale: "ja_JP",
     images: [
-      { url: "/images/ogp.png", width: 1200, height: 630, alt: "買取ハント｜新品・未使用ランク特化の高価買取サービス" },
+      {
+        url: "/images/ogp.png",
+        width: 1200,
+        height: 630,
+        alt: "買取ハント｜新品・未使用ランク特化の高価買取サービス",
+      },
     ],
   },
   twitter: {
@@ -64,7 +73,10 @@ export const metadata: Metadata = {
     images: ["/images/ogp.png"],
   },
   ...(isProd
-    ? { alternates: { canonical: "https://kaitori-hunt.com" }, robots: { index: true, follow: true } }
+    ? {
+        alternates: { canonical: "https://kaitori-hunt.com" },
+        robots: { index: true, follow: true },
+      }
     : { robots: { index: false, follow: false } }),
 
   // ★ ここをしっかり指定
@@ -92,6 +104,28 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head />
       <body className="min-h-[100svh] overflow-x-hidden bg-background text-foreground antialiased font-sans">
         <ClientRoot>{children}</ClientRoot>
+
+        {/* ========== Google Analytics 4（GA4） ========== */}
+        {GA_ID && (
+          <>
+            {/* gtag.js 本体 */}
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            {/* 初期化スクリプト */}
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );
