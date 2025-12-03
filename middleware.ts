@@ -49,14 +49,27 @@ function withSecurityHeaders(_req: NextRequest, res: NextResponse) {
   const isProd = process.env.NODE_ENV === "production";
   const supaHosts = getSupabaseHosts();
 
-  const imgSrc = ["'self'", "data:", "blob:", ...supaHosts.map((h) => `https://${h}`)].join(" ");
+  const imgSrc = [
+    "'self'",
+    "data:",
+    "blob:",
+    ...supaHosts.map((h) => `https://${h}`),
+  ].join(" ");
+
   const connectSrc = [
     "'self'",
     ...supaHosts.map((h) => `https://${h}`),
     "https://api.resend.com",
+    // ★ GA 関連の送信先も許可
+    "https://www.google-analytics.com",
+    "https://www.googletagmanager.com",
     ...(isProd ? [] : ["ws:", "wss:"]),
   ].join(" ");
-  const scriptSrc = isProd ? "'self' 'unsafe-inline'" : "'self' 'unsafe-inline' 'unsafe-eval'";
+
+  // ★ script-src に GA / GTM を追加
+  const scriptSrc = isProd
+    ? "'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com"
+    : "'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com";
 
   const cspDirectives = [
     "default-src 'self'",
