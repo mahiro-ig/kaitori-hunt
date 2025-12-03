@@ -23,27 +23,16 @@ const nextConfig = {
         headers: [
           {
             key: "Content-Security-Policy",
-            // ① 最小許可：対象ドメインだけ
-            // value:
-            //   "default-src 'self'; " +
-            //   "img-src 'self' https://lcpnydywtjnnarfkkkat.supabase.co data: blob:; " +
-            //   "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
-            //   "style-src 'self' 'unsafe-inline'; " +
-            //   "connect-src 'self' https://lcpnydywtjnnarfkkkat.supabase.co https://*.supabase.co ws:; " +
-            //   "font-src 'self' data:; " +
-            //   "media-src 'self' https://lcpnydywtjnnarfkkkat.supabase.co; " +
-            //   "frame-src 'self'; " +
-            //   "object-src 'none'; " +
-            //   "base-uri 'self'; " +
-            //   "frame-ancestors 'self';",
-
-            // ② 広めに許可：全HTTPS画像をOK（運用が楽）
+            // ★ GA4 / gtag を許可した版
             value:
               "default-src 'self'; " +
+              // 画像は全HTTPS + data/blob
               "img-src 'self' https: data: blob:; " +
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
+              // 👉 GA用ドメインを script-src に追加
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; " +
               "style-src 'self' 'unsafe-inline'; " +
-              "connect-src 'self' https://*.supabase.co wss:; " +
+              // 👉 GA用ドメインを connect-src にも追加
+              "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://www.googletagmanager.com wss:; " +
               "font-src 'self' data:; " +
               "media-src 'self' https:; " +
               "frame-src 'self'; " +
