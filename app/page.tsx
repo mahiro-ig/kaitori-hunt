@@ -143,7 +143,7 @@ export default function Home() {
                 <div className="space-y-2">
                   {/* フレーズ更新（ブランド軸） */}
                   <h1 id="hero-heading" className="text-2xl font-bold tracking-tighter sm:text-4xl xl:text-5xl/none lg:whitespace-nowrap lg:leading-none">
-                    国内最高値買取・即日現金化
+                    新品高価買取・即日現金化
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-lg">
                     iPhone・カメラ・ゲームの専門買取サービス<br />
