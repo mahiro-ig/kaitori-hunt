@@ -268,7 +268,7 @@ export default function CameraProductDetailPage() {
                 <p className="text-2xl font-bold mb-4">
                   {selectedVariant
                     ? `¥${selectedVariant.buyback_price.toLocaleString()}`
-                    : "カラーおよびモデルを選択してください"}
+                    : "カラーとモデルを選択してください"}
                 </p>
                 <Button
                   type="button"

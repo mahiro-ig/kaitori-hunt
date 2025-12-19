@@ -280,7 +280,7 @@ export default function IPhoneProductDetailPage() {
                 <p className="text-2xl font-bold mb-4">
                   {selectedVariant
                     ? `¥${selectedVariant.buyback_price.toLocaleString()}`
-                    : "価格を選択してください"}
+                    : "カラーと容量を選択してください"}
                 </p>
                 <Button
                   type="button"
