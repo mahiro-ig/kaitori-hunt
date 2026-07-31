@@ -60,8 +60,9 @@ export default function TermsPage() {
                   ["#article-7", "第7条 禁止される行為"],
                   ["#article-8", "第8条 免責事項"],
                   ["#article-9", "第9条 利用停止措置"],
-                  ["#article-10", "第10条 規約の改定"],
-                  ["#article-11", "第11条 準拠法・管轄"],
+                  ["#article-10", "第10条 やむを得ない事由による買取申込の取消し"],
+                  ["#article-11", "第11条 規約の改定"],
+                  ["#article-12", "第12条 準拠法・管轄"]
                 ].map(([href, label]) => (
                   <div key={href}>
                     <Link
@@ -118,8 +119,9 @@ export default function TermsPage() {
                     ["#article-7", "第7条 禁止される行為"],
                     ["#article-8", "第8条 免責事項"],
                     ["#article-9", "第9条 利用停止措置"],
-                    ["#article-10", "第10条 規約の改定"],
-                    ["#article-11", "第11条 準拠法・管轄"],
+                    ["#article-10", "第10条 やむを得ない事由による買取申込の取消し"],
+                    ["#article-11", "第11条 規約の改定"],
+                    ["#article-12", "第12条 準拠法・管轄"]
                   ].map(([href, label]) => (
                     <Link
                       key={href}
@@ -243,14 +245,33 @@ export default function TermsPage() {
           </section>
 
           <section id="article-10" className="scroll-mt-20">
-            <h2 className="text-xl font-bold mb-2">第10条（規約の改定）</h2>
+            <h2 className="text-xl font-bold mb-2">第10条（やむを得ない事由による買取申込の取消し）</h2>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>当社は、買取申込受付後であっても、次のいずれかの事由により、当社が買取申込受付時に提示した条件で本サービスを継続すること、または買取代金の支払いが著しく困難となり、もしくはその恐れがある場合には、利用者に通知の上、当該買取申込を取消し、対象商品を返送することが出来るものとします。</li>
+              <li>
+                前項に定める事由は次のとおりです。
+                <ul className="list-disc pl-5 mt-1">
+                  <li>紛争、テロ、暴動その他これらに類する事態</li>
+                  <li>天災地変または感染症の流行</li>
+                  <li>政府または行政機関による規制、命令、為替介入その他これらに類する措置</li>
+                  <li>法令の制定、改廃または経済制裁</li>
+                  <li>金融機関または決済システムの障害</li>
+                  <li>その他当社の合理的な支配を超えるやむを得ない事由</li>
+                </ul>
+              </li>
+            </ol>
+          </section>
+
+
+          <section id="article-10" className="scroll-mt-20">
+            <h2 className="text-xl font-bold mb-2">第11条（規約の改定）</h2>
             <p>
               当社は、必要に応じて本規約を改定することがあります。改定後に本サービスを利用された場合、改定後の内容に同意いただいたものとみなします。
             </p>
           </section>
 
           <section id="article-11" className="scroll-mt-20">
-            <h2 className="text-xl font-bold mb-2">第11条（準拠法・管轄）</h2>
+            <h2 className="text-xl font-bold mb-2">第12条（準拠法・管轄）</h2>
             <p>
               本規約は日本法に準拠します。本規約に関する一切の紛争は、新潟地方裁判所を第一審の専属的合意管轄裁判所とします。
             </p>
